@@ -24,9 +24,9 @@ def main():
             stats = get_gpu_stats()
             osc_handler.send_gpu_stats(stats)
             
-            # Send random prompts every 5 seconds
+            # Send random prompts every 10 seconds
             prompt_interval += 1
-            if prompt_interval >= 10:  # 50 * 0.1s = 5 seconds
+            if prompt_interval >= 100:  # 100 * 0.1s = 10 seconds
                 prompt = random.choice(config.image_prompts)
                 osc_handler.processing_client.send_message("/prompt", prompt)
                 osc_handler.touchdesigner_client.send_message("/prompt", prompt)

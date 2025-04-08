@@ -15,7 +15,7 @@ float lerpAmount = 0; // Lerp progress
 float lerpSpeed = 0.03; // Speed of transition
 
 void setup() {
-  fullScreen(P3D, 1);
+  fullScreen(P3D, 2);
 
   String[] cameras = Capture.list();
   println("Available cameras:");
@@ -103,8 +103,8 @@ void draw() {
   // Display current prompt if available
   if (currentPrompt != null && currentPrompt.length() > 0) {
     textSize(baseTextSize * 1.2);
-    textAlign(LEFT, CENTER);
-    text(currentPrompt, width/2, height*0.7, width*0.42, height*0.3);
+    textAlign(CENTER, CENTER);
+    text(currentPrompt, width * 0.2, height*0.7, width*0.6, height*0.3);
   }
 
   // Run garbage collection every 300 frames to manage memory
