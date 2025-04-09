@@ -15,7 +15,7 @@ float lerpAmount = 0; // Lerp progress
 float lerpSpeed = 0.03; // Speed of transition
 
 void setup() {
-  fullScreen(P3D, 2);
+  fullScreen(P3D, 1);
 
   String[] cameras = Capture.list();
   println("Available cameras:");

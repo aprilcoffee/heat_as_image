@@ -1,7 +1,7 @@
 # Configuration variables
 init_power_Consumption = 450
 power_Consumption = init_power_Consumption
-center = 45
+center = 60
 
 # Network configuration
 PROCESSING_IP = "127.0.0.1"
