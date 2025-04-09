@@ -13,6 +13,10 @@ class OSCHandler:
             config.TOUCHDESIGNER_IP, 
             config.TOUCHDESIGNER_PORT
         )
+        self.parler_client = udp_client.SimpleUDPClient(
+            config.PARLER_IP,
+            config.PARLER_PORT
+        )
 
     def prompt_handler(self, address, *args):
         """Handle incoming OSC messages for prompt changes"""
@@ -24,7 +28,8 @@ class OSCHandler:
             # Immediately send new prompt to Processing and TouchDesigner
             self.processing_client.send_message("/prompt", args[0])
             self.touchdesigner_client.send_message("/prompt", args[0])
-
+            self.parler_client.send_message("/prompt", args[0])
+            
     def start_osc_server(self):
         """Start OSC server to listen for incoming messages"""
         dispatcher = Dispatcher()

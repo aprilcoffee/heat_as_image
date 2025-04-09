@@ -1,13 +1,15 @@
 # Configuration variables
 init_power_Consumption = 450
 power_Consumption = init_power_Consumption
-center = 60
+center = 50
 
 # Network configuration
 PROCESSING_IP = "127.0.0.1"
 PROCESSING_PORT = 12000
 TOUCHDESIGNER_IP = "127.0.0.1"
 TOUCHDESIGNER_PORT = 7000
+PARLER_IP = "127.0.0.1"
+PARLER_PORT = 9000
 OSC_SERVER_IP = "127.0.0.1"
 OSC_SERVER_PORT = 8000
 

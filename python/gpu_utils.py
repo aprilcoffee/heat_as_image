@@ -22,7 +22,7 @@ def get_gpu_stats():
         else:
             power_Consumption = min(500, power_Consumption + 5)
 
-        subprocess.run(['nvidia-smi', '-pl', str(power_Consumption)], capture_output=True)
+        #subprocess.run(['nvidia-smi', '-pl', str(power_Consumption)], capture_output=True)
         
         return {
             'temperature': temp,

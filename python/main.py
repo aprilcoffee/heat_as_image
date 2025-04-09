@@ -28,6 +28,9 @@ def main():
             prompt_interval += 1
             if prompt_interval >= 100:  # 100 * 0.1s = 10 seconds
                 prompt = random.choice(config.image_prompts)
+                
+                osc_handler.parler_client.send_message("/prompt", prompt)
+                time.sleep(4)
                 osc_handler.processing_client.send_message("/prompt", prompt)
                 osc_handler.touchdesigner_client.send_message("/prompt", prompt)
                 prompt_interval = 0
