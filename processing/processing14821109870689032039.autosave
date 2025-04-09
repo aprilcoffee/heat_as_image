@@ -15,8 +15,6 @@ float lerpAmount = 0; // Lerp progress
 float lerpSpeed = 0.03; // Speed of transition
 
 int getScreenNumber(String screenName) {
- 
-  println("Current display: " + displayWidth + "x" + displayHeight);
   switch(screenName.toLowerCase()) {
     case "main": return 1;
     case "secondary": return 2;
@@ -26,7 +24,7 @@ int getScreenNumber(String screenName) {
 }
 
 void setup() {
-  fullScreen(P3D, getScreenNumber("main"));
+  fullScreen(P3D, getScreenNumber("secondary"));
 
   String[] cameras = Capture.list();
   println("Available cameras:");

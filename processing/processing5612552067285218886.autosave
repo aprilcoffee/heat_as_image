@@ -14,19 +14,10 @@ PGraphics prevBuffer; // Buffer for previous frame
 float lerpAmount = 0; // Lerp progress
 float lerpSpeed = 0.03; // Speed of transition
 
-int getScreenNumber(String screenName) {
- 
-  println("Current display: " + displayWidth + "x" + displayHeight);
-  switch(screenName.toLowerCase()) {
-    case "main": return 1;
-    case "secondary": return 2;
-    case "tablet": return 3;
-    default: return 1;  // default to main screen
-  }
-}
+
 
 void setup() {
-  fullScreen(P3D, getScreenNumber("main"));
+  fullScreen(P3D, 2);
 
   String[] cameras = Capture.list();
   println("Available cameras:");
