@@ -52,30 +52,12 @@ void setup() {
   // Initialize OSC and listen on port 12000
   oscP5 = new OscP5(this, 12000);
 }
-boolean title = false;
-long lastTitleChange = 0;
-final int TITLE_OFF_DURATION = 20000; // 20 seconds in milliseconds
-final int TITLE_ON_DURATION = 4000;  // 5 seconds in milliseconds
 
+boolean title = false;
 void keyReleased() {
   title = !title;
-  lastTitleChange = millis();
-}
-
-void updateTitleState() {
-  long currentTime = millis();
-  long elapsedTime = currentTime - lastTitleChange;
-  
-  if (title && elapsedTime >= TITLE_ON_DURATION) {
-    title = false;
-    lastTitleChange = currentTime;
-  } else if (!title && elapsedTime >= TITLE_OFF_DURATION) {
-    title = true;
-    lastTitleChange = currentTime;
-  }
 }
 void draw() {
-  updateTitleState();
   background(0);
 
 
@@ -153,7 +135,7 @@ void draw() {
     if (currentPrompt != null && currentPrompt.length() > 0) {
       textSize(baseTextSize * 1.1);
       textAlign(CENTER, CENTER);
-      text(currentPrompt, width * 0.07, height*0.7, width*0.84, height*0.3);
+      text(currentPrompt, width * 0.12, height*0.7, width*0.76, height*0.3);
     }
   }
   // Run garbage collection every 300 frames to manage memory

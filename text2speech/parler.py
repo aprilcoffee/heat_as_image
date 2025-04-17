@@ -20,7 +20,7 @@ def load_model():
 class ParlerHandler:
     def __init__(self):
         self.model, self.tokenizer, self.device = load_model()
-        self.description = "40-year-old smoker woman, that had a very very good day, speaking slowly and with a lot of emotion"
+        self.description = "Cate Blanchett, speaking in a slow and emotional way"
         self.input_ids = self.tokenizer(self.description, return_tensors="pt").input_ids.to(self.device)
 
     def prompt_handler(self, address, *args):
@@ -30,9 +30,14 @@ class ParlerHandler:
             text = args[0]
             try:
                 print(f"Generating audio for: {text}")
+                start_time = time.time()
+                
                 prompt_input_ids = self.tokenizer(text+"    ", return_tensors="pt").input_ids.to(self.device)
                 generation = self.model.generate(input_ids=self.input_ids, prompt_input_ids=prompt_input_ids)
                 audio_arr = generation.cpu().numpy().squeeze()
+                
+                generation_time = time.time() - start_time
+                print(f"Audio generated in {generation_time:.2f} seconds")
                 
                 print("Playing audio...")
                 # Play audio in a separate thread to not block OSC server

@@ -15,19 +15,9 @@ OSC_SERVER_PORT = 8000
 
 # List of creative image prompts
 image_prompts = [
-    "silicon wafers glowing in clean room lights",
-    "transistors etched in crystalline patterns",
-    "NVIDIA engineers crafting GPU dies",
-    "AMD fabrication plants humming with energy",
-    "semiconductor masks aligning precisely",
-    "TSMC clean rooms buzzing with activity",
-    "RTX chips emerging from silicon foundries",
-    "circuit traces flowing like digital rivers",
-    "Intel engineers testing processor cores",
-    "photolithography beams etching circuits",
-    "GPU dies arranged in perfect formation",
-    "clean room workers in bunny suits dancing",
-    "molten silicon cooling into perfect wafers",
-    "quantum tunneling in nanometer gates",
-    "ray tracing cores lighting up benchmark tests"
+    "In a pristine clean room bathed in pure white light, engineers in bunny suits carefully guide glowing silicon wafers through precision machines that etch microscopic patterns into their crystalline surfaces.",
+    "Deep within the semiconductor facility, laser beams dance across silicon masks while engineers monitor the birth of next-generation GPU cores from raw materials to finished chips.",
+    "Through the sterile corridors of the fabrication plant, skilled technicians orchestrate an elegant ballet of atomic-scale manufacturing as transistors emerge from the silicon like digital flowers.",
+    "Under the watchful eyes of clean room workers, photolithography beams trace delicate patterns across semiconductor wafers, creating intricate pathways for electronic dreams to flow.",
+    "In the heart of the chip factory, molten silicon transforms into powerful processors as engineers in white suits guide their metamorphosis through a carefully choreographed dance of precision and science."
 ] 

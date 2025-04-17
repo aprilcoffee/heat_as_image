@@ -9,7 +9,7 @@ import threading
 import socket
 import netifaces
 import sys
-
+#hello aprilcoffee greetz cnrd its april!!!!!!!! b-day soon!!!!!!!!!! best month!!!!! ~~~~
 # Default values
 init_power_Consumption = 450
 power_Consumption = init_power_Consumption
