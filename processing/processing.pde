@@ -31,8 +31,8 @@ int getScreenNumber(String screenName) {
 }
 
 void setup() {
-  fullScreen(P3D, getScreenNumber("secondary"));
-  font = createFont("anonymous_pro", 128);
+  fullScreen(P2D, getScreenNumber("secondary"));
+  font = createFont("Anonymous Pro", 128);
   textFont(font);
   String[] cameras = Capture.list();
   println("Available cameras:");
@@ -151,9 +151,9 @@ void draw() {
 
     // Display current prompt if available
     if (currentPrompt != null && currentPrompt.length() > 0) {
-      textSize(baseTextSize * 1.1);
+      textSize(baseTextSize * 1.5);
       textAlign(CENTER, CENTER);
-      text(currentPrompt, width * 0.07, height*0.7, width*0.84, height*0.3);
+      text(currentPrompt, width * 0.05, height*0.5, width*0.90, height*0.3);
     }
   }
   // Run garbage collection every 300 frames to manage memory
