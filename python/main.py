@@ -6,6 +6,7 @@ from network_utils import get_network_info
 from gpu_utils import get_gpu_stats
 from osc_handler import OSCHandler
 import config
+from prompts import image_prompts
 
 def main():
     get_network_info()
@@ -27,8 +28,7 @@ def main():
             # Send random prompts every 10 seconds
             prompt_interval += 1
             if prompt_interval >= 100:  # 100 * 0.1s = 10 seconds
-                prompt = random.choice(config.image_prompts)
-                # Use /prompt address for random prompts to avoid replacing the list
+                prompt = random.choice(image_prompts)
                 osc_handler.prompt_handler("/prompt", prompt)
                 prompt_interval = 0
                     

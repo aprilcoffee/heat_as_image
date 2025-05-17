@@ -3,10 +3,10 @@ from parler_tts import ParlerTTSForConditionalGeneration
 from transformers import AutoTokenizer
 import sounddevice as sd
 import time
+from pythonosc import udp_client
 from pythonosc.dispatcher import Dispatcher
 from pythonosc.osc_server import BlockingOSCUDPServer
 import threading
-import udp_client
 
 # Network configuration
 PARLER_IP = "127.0.0.1"
@@ -43,14 +43,14 @@ class ParlerHandler:
                 generation_time = time.time() - start_time
                 print(f"Audio generated in {generation_time:.2f} seconds")
                 
+                # Send completion message BEFORE playing audio
+                self.response_client.send_message("/audio_complete", text)
+                
                 print("Playing audio...")
-                # Play audio in a separate thread to not block OSC server
                 def play_audio():
                     sd.play(audio_arr, self.model.config.sampling_rate)
                     sd.wait()
                     print("Audio played successfully!")
-                    # Send completion message on different port
-                    self.response_client.send_message("/audio_complete", text)
                 
                 audio_thread = threading.Thread(target=play_audio)
                 audio_thread.start()
