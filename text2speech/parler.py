@@ -6,10 +6,12 @@ import time
 from pythonosc.dispatcher import Dispatcher
 from pythonosc.osc_server import BlockingOSCUDPServer
 import threading
+import udp_client
 
 # Network configuration
 PARLER_IP = "127.0.0.1"
 PARLER_PORT = 9000
+PARLER_RESPONSE_PORT = 9001
 
 def load_model():
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
@@ -22,6 +24,8 @@ class ParlerHandler:
         self.model, self.tokenizer, self.device = load_model()
         self.description = "Cate Blanchett, speaking in a slow and emotional way"
         self.input_ids = self.tokenizer(self.description, return_tensors="pt").input_ids.to(self.device)
+        # Create OSC client for sending completion messages
+        self.response_client = udp_client.SimpleUDPClient("127.0.0.1", PARLER_RESPONSE_PORT)
 
     def prompt_handler(self, address, *args):
         """Handle incoming OSC messages for text-to-speech"""
@@ -45,6 +49,8 @@ class ParlerHandler:
                     sd.play(audio_arr, self.model.config.sampling_rate)
                     sd.wait()
                     print("Audio played successfully!")
+                    # Send completion message on different port
+                    self.response_client.send_message("/audio_complete", text)
                 
                 audio_thread = threading.Thread(target=play_audio)
                 audio_thread.start()

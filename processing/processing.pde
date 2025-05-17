@@ -55,7 +55,7 @@ void setup() {
 boolean title = false;
 long lastTitleChange = 0;
 final int TITLE_OFF_DURATION = 20000; // 20 seconds in milliseconds
-final int TITLE_ON_DURATION = 4000;  // 5 seconds in milliseconds
+final int TITLE_ON_DURATION = 10000;  // 5 seconds in milliseconds
 
 void keyReleased() {
   title = !title;
@@ -65,7 +65,7 @@ void keyReleased() {
 void updateTitleState() {
   long currentTime = millis();
   long elapsedTime = currentTime - lastTitleChange;
-  
+
   if (title && elapsedTime >= TITLE_ON_DURATION) {
     title = false;
     lastTitleChange = currentTime;
@@ -83,6 +83,9 @@ void draw() {
     textAlign(CENTER, CENTER);
     textSize(150);
     text(nf(temperature, 0, 1) + "°C", width/2, height/2);
+    textSize(100);
+
+    //text("Can someone help me check my phone and message me if its working?", width/2, height/2, width, height);
   } else {
 
     // Update camera buffer
@@ -153,7 +156,7 @@ void draw() {
     if (currentPrompt != null && currentPrompt.length() > 0) {
       textSize(baseTextSize * 1.5);
       textAlign(CENTER, CENTER);
-      text(currentPrompt, width * 0.05, height*0.5, width*0.90, height*0.3);
+      text(currentPrompt, width * 0.07, height*0.7, width*0.84, height*0.3);
     }
   }
   // Run garbage collection every 300 frames to manage memory
