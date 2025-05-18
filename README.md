@@ -1,44 +1,78 @@
 # Heat as Image
 
-Real-time GPU temperature visualization system using TouchDesigner's Stream Diffusion, Processing, and AI voice synthesis.
+A real-time generative image processing system that transforms GPU temperature into visual art through Stream Diffusion, Processing, and AI voice synthesis.
+
+## Core Concept
+The system uses U-Net architecture through Stream Diffusion, operating in two main phases:
+- Contraction path (encoder): Distills images to essential features
+- Expansion path (decoder): Reconstructs images with temperature-influenced variations
+
+This dual-process architecture creates a feedback loop where GPU heat directly influences the image generation process, creating a self-referential system of computation and visualization.
 
 ## Requirements
+### Hardware
 - NVIDIA GPU (RTX series recommended)
+- Proper power supply and cooling
+- Audio output device
+
+### Software
 - Windows 10/11
-- Python 3.8+
+- NVIDIA CUDA Toolkit 12.1
 - TouchDesigner 2023+
 - Processing 4
-- CUDA Toolkit 12.1
-- [Stream Diffusion for TouchDesigner](https://derivative.ca/community-post/asset/stream-diffusion-touchdesigner) - Real-time image generation in TouchDesigner
+- Python 3.8+
+- NDI Tools
 
-## Installation
+## Detailed Installation
 
-### Python Setup
+### 1. GPU and CUDA Setup
+1. Install NVIDIA GPU drivers
+2. Install CUDA Toolkit 12.1
+3. Verify installation:
+```bash
+nvcc --version
+nvidia-smi
+```
+
+### 2. Python Environment
 ```bash
 python -m venv venv
 .\venv\Scripts\activate
 
+# Core dependencies
 pip install python-osc
 pip install sounddevice
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+pip install streamdiffusion
+
+# Voice synthesis
 pip install parler-tts
 pip install transformers
 ```
 
-### TouchDesigner Setup
+### 3. TouchDesigner Setup
 1. Install TouchDesigner
-2. Install Stream Diffusion:
-   - Follow installation guide at [StreamDiffusion](https://github.com/cumulo-autumn/StreamDiffusion)
-   - Download model files
-   - Configure CUDA paths
-3. Open project file (.toe)
+2. Install [Stream Diffusion for TouchDesigner](https://derivative.ca/community-post/asset/stream-diffusion-touchdesigner)
+3. Configure Stream Diffusion:
+   - Set up model paths
+   - Configure CUDA settings
+   - Test standalone operation
+4. Open project file (.toe)
 
-### Processing Setup
+### 4. Processing Setup
 1. Install Processing
-2. Install oscP5 library via Tools → Add Tool
+2. Add Libraries:
+   - Tools → Add Tool → Libraries
+   - Install "oscP5"
+   - Install "NDI" for video streaming
 3. Open project file (.pde)
 
-## Configuration
+### 5. NDI Setup
+1. Install NDI Tools
+2. Configure NDI inputs/outputs in TouchDesigner
+3. Verify NDI stream reception in Processing
+
+## Network Configuration
 Edit `config.py` for network settings:
 ```python
 PROCESSING_PORT = 12000
@@ -50,10 +84,17 @@ PARLER_RESPONSE_PORT = 9001
 OSC_SERVER_PORT = 8000
 ```
 
+## System Architecture
+1. GPU Temperature Monitoring → OSC Communication
+2. Stream Diffusion Processing in TouchDesigner
+3. NDI Video Stream Pipeline
+4. Processing Visualization
+5. Voice Synthesis Feedback
+
 ## Usage
 1. Start TouchDesigner project
-2. Run Processing sketch
-3. Start Parler:
+2. Launch Processing sketch
+3. Start Parler service:
 ```bash
 cd text2speech
 python parler.py
@@ -65,15 +106,15 @@ python main.py
 ```
 
 ## Features
-- Real-time GPU monitoring
-- Dynamic text-to-speech
+- Real-time GPU temperature monitoring
 - Dual-layer diffusion control:
-  - Main steps (port 7001): Direct control of diffusion strength
+  - Main steps (port 7001): Direct temperature influence
   - Sine wave variation (port 7002): Continuous subtle changes
-- Automatic prompt generation
+- Dynamic text-to-speech generation
+- NDI video streaming
 - Temperature/camera mode switching
 
-## Project Structure 
+## Project Structure
 
 ## Acknowledgments
 - [Stream Diffusion for TouchDesigner](https://derivative.ca/community-post/asset/stream-diffusion-touchdesigner) for real-time image generation
