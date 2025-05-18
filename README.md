@@ -2,13 +2,6 @@
 
 A real-time generative image processing system that transforms GPU temperature into visual art through Stream Diffusion, Processing, and AI voice synthesis.
 
-## Core Concept
-The system uses U-Net architecture through Stream Diffusion, operating in two main phases:
-- Contraction path (encoder): Distills images to essential features
-- Expansion path (decoder): Reconstructs images with temperature-influenced variations
-
-This dual-process architecture creates a feedback loop where GPU heat directly influences the image generation process, creating a self-referential system of computation and visualization.
-
 ## Requirements
 ### Hardware
 - NVIDIA GPU (RTX series recommended)
@@ -115,8 +108,33 @@ python main.py
 - Temperature/camera mode switching
 
 ## Project Structure
+```
+heat_as_image/
+├── python/
+│   ├── config.py          # Configuration settings
+│   ├── prompts.py         # Prompt lists and instructions
+│   ├── main.py           # Main program
+│   ├── osc_handler.py    # OSC communication
+│   ├── gpu_utils.py      # GPU monitoring
+│   └── network_utils.py  # Network utilities
+├── text2speech/
+│   └── parler.py         # Text-to-speech handler
+└── processing/
+    └── processing.pde    # Processing visualization
+```
+
+## License
+MIT License
+
+Copyright (c) 2024 aprilcoffee
+
+[Standard MIT License text...]
+
+## Authors
+[aprilcoffee](https://github.com/aprilcoffee)
 
 ## Acknowledgments
-- [Stream Diffusion for TouchDesigner](https://derivative.ca/community-post/asset/stream-diffusion-touchdesigner) for real-time image generation
-- [Parler TTS](https://github.com/parler-tts/parler-tts) for voice synthesis
-- TouchDesigner and Processing communities 
+- [Stream Diffusion for TouchDesigner](https://derivative.ca/community-post/asset/stream-diffusion-touchdesigner)
+- [Parler TTS](https://github.com/parler-tts/parler-tts)
+- TouchDesigner and Processing communities
+- U-Net architecture and its applications in real-time image processing
