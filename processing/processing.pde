@@ -63,6 +63,8 @@ void keyReleased() {
 }
 
 void updateTitleState() {
+  // Comment out automatic switching
+  /*
   long currentTime = millis();
   long elapsedTime = currentTime - lastTitleChange;
 
@@ -73,6 +75,7 @@ void updateTitleState() {
     title = true;
     lastTitleChange = currentTime;
   }
+  */
 }
 void draw() {
   updateTitleState();
