@@ -2,11 +2,13 @@ from pythonosc import udp_client
 from pythonosc.dispatcher import Dispatcher
 from pythonosc.osc_server import BlockingOSCUDPServer
 import config
-from prompts import TD_INSTRUCTIONS, image_prompts
+from prompts import TD_INSTRUCTIONS, PROMPT_PAIRS
 import random
 import threading
 import time
 import math
+from gpu_utils import control_temperature
+from config import center
 
 class OSCHandler:
     def __init__(self):
@@ -16,7 +18,7 @@ class OSCHandler:
         )
         self.touchdesigner_client = udp_client.SimpleUDPClient(
             config.TOUCHDESIGNER_IP, 
-            config.TOUCHDESIGNER_PORT  # 7000 for main
+            config.TOUCHDESIGNER_PORT
         )
         self.td_steps_client1 = udp_client.SimpleUDPClient(
             config.TOUCHDESIGNER_IP,
@@ -30,8 +32,7 @@ class OSCHandler:
             config.PARLER_IP,
             config.PARLER_PORT
         )
-        self.pending_prompt = None
-        self.current_steps_main = 25  # For port 7001 (main)
+        self.current_steps_main = 25
         self.target_steps_main = 25
         self.current_steps_sine = 35  # For port 7002 (sine wave, different range)
         self.sine_center = 35  # Center point for sine wave
@@ -65,49 +66,61 @@ class OSCHandler:
                 self.transition_active = False
 
     def prompt_handler(self, address, *args):
-        if args and isinstance(args[0], str):
-            prompt = args[0]
-            step_instruction = None
+        """Handle incoming OSC messages for prompt changes"""
+        if args and isinstance(args[0], dict):
+            prompt_pair = args[0]
             
-            # Check for special instructions
+            # Temperature display handling
+            if prompt_pair.get("show_temp", False):
+                target_temp = prompt_pair.get("target_temp", center)
+                stats = control_temperature(target_temp=target_temp)
+                if stats:
+                    # Send 1 to show temperature display
+                    self.processing_client.send_message("/display/mode", 1)
+                    # Send current temperature to Processing
+                    self.processing_client.send_message("/gpu/temperature", stats['temperature'])
+                    # Send simple text to Parler (can be None or "This is a GPU")
+                    display_text = prompt_pair.get("display")
+                    if display_text:
+                        self.parler_client.send_message("/prompt", display_text)
+                    
+                    # Set steps to ORIGINAL during temperature display
+                    self.set_steps(50)  # ORIGINAL steps value
+                return
+            
+            # Normal temperature control
+            stats = control_temperature(target_temp=None)
+            # Send 0 to show camera view
+            self.processing_client.send_message("/display/mode", 0)
+            
+            # Handle regular prompt pair
+            generate_prompt = prompt_pair["generate"]
+            display_prompt = prompt_pair["display"]
+            
+            # Extract step instruction from generate prompt
             for instruction in TD_INSTRUCTIONS.values():
-                if instruction in prompt:
+                if instruction in generate_prompt:
                     step_instruction = int(instruction.split('=')[1])
-                    prompt = prompt.replace(instruction, "")  # Remove instruction
+                    generate_prompt = generate_prompt.replace(instruction, "").strip()
+                    self.set_steps(step_instruction)
                     break
             
-            # First send to Parler and wait for audio to start
-            self.parler_client.send_message("/prompt", prompt)
+            # Send to Parler first
+            self.parler_client.send_message("/prompt", display_prompt)
             
-            # When we receive audio completion signal, then:
-            # 1. Start the step transition
-            if step_instruction is not None:
-                self.target_steps_main = step_instruction
-                
-                # Stop existing transition if running
-                if self.transition_active:
-                    self.transition_active = False
-                    if self.transition_thread:
-                        self.transition_thread.join()
-                
-                # Start new transition
-                self.transition_active = True
-                self.transition_thread = threading.Thread(target=self.transition_steps)
-                self.transition_thread.daemon = True
-                self.transition_thread.start()
+            # Send generation prompt to TouchDesigner
+            self.touchdesigner_client.send_message("/prompt", generate_prompt)
             
-            # 2. Send to Processing and TouchDesigner
-            self.processing_client.send_message("/prompt", prompt)
-            self.touchdesigner_client.send_message("/prompt", prompt)
+            # Send display prompt to Processing
+            self.processing_client.send_message("/prompt", display_prompt)
 
     def audio_complete_handler(self, address, *args):
         """Handle audio completion messages"""
         if args and isinstance(args[0], str):
-            if self.pending_prompt == args[0]:  # Verify it's the same prompt
-                print(f"Audio complete, sending to visual clients: {args[0]}")
-                self.processing_client.send_message("/prompt", args[0])
-                self.touchdesigner_client.send_message("/prompt", args[0])
-                self.pending_prompt = None
+            if self.current_steps_main == self.target_steps_main:  # Verify it's the same prompt
+                print(f"Audio complete, sending to visual clients: {self.current_steps_main}")
+                self.processing_client.send_message("/prompt", self.current_steps_main)
+                self.touchdesigner_client.send_message("/prompt", self.current_steps_main)
 
     def start_osc_server(self):
         """Start OSC server to listen for incoming messages"""
@@ -161,4 +174,14 @@ class OSCHandler:
             self.td_steps_client2.send_message("/steps", 0)
         elif mode == "BALANCED":
             self.td_steps_client1.send_message("/steps", 25)
-            self.td_steps_client2.send_message("/steps", 25) 
+            self.td_steps_client2.send_message("/steps", 25)
+
+    def set_steps(self, steps):
+        """Set the current and target steps"""
+        self.current_steps_main = steps
+        self.target_steps_main = steps
+        self.td_steps_client1.send_message("/steps", self.current_steps_main)
+        self.td_steps_client2.send_message("/steps", self.current_steps_main)
+        self.transition_active = True
+        self.transition_thread = threading.Thread(target=self.transition_steps)
+        self.transition_thread.start() 
