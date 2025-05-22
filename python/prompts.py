@@ -10,11 +10,6 @@ TD_INSTRUCTIONS = {
 # Detailed narrative prompts that tell the thesis story chronologically
 PROMPT_PAIRS = [
     # Opening sequence
-    {
-        "generate": f"A programmer creates an interactive web-based art piece showing orange particle systems forming a sun, while the computer CPU heats up from the computation {TD_INSTRUCTIONS['BALANCED']}",
-        "display": "CPU thermal output visualization system v1.0",
-        "show_temp": False
-    },
     # First temperature check
     {
         "generate": None,
@@ -23,12 +18,22 @@ PROMPT_PAIRS = [
         "target_temp": 75
     },
     {
+        "generate": f"A Grphaical Processing Unit {TD_INSTRUCTIONS['ORIGINAL']}",
+        "display": "This is a GPU",
+        "show_temp": False
+    },
+    {
+        "generate": f"A GPU {TD_INSTRUCTIONS['BALANCED']}",
+        "display": "This is also aGPU",
+        "show_temp": False
+    },
+    {
         "generate": f"A computer screen displays Python code: 'from diffusers import DiffusionPipeline, import torch, model = stable-diffusion-v1-5' with execution errors visible {TD_INSTRUCTIONS['SLIGHT_DIFF']}",
         "display": "Initializing diffusion pipeline dependencies",
         "show_temp": False
     },
     {
-        "generate": f"Multiple windows open on a desktop showing AI-generated landscapes being processed through additional filters in Processing software {TD_INSTRUCTIONS['ORIGINAL']}",
+        "generate": f"Multiple windows open on a desktop showing AI-generated landscapes being processed through additional filters in Processing software {TD_INSTRUCTIONS['HEAVY_DIFF']}",
         "display": "Processing: post-generation image analysis",
         "show_temp": False
     },
@@ -48,7 +53,7 @@ PROMPT_PAIRS = [
         "show_temp": False
     },
     {
-        "generate": f"Testing interface showing CLIP model scoring different faces: 87% match between Asian face and 'dumpling', 92% match between white face and 'schnitzel' {TD_INSTRUCTIONS['ORIGINAL']}",
+        "generate": f"Testing interface showing CLIP model scoring different faces: 87% match between Asian face and 'dumpling', 92% match between white face and 'schnitzel' {TD_INSTRUCTIONS['CREATIVE']}",
         "display": "CLIP model: semantic analysis report",
         "show_temp": False
     },
@@ -74,6 +79,16 @@ PROMPT_PAIRS = [
         "target_temp": 50
     },
     {
+        "generate": f"A Grphaical Processing Unit {TD_INSTRUCTIONS['ORIGINAL']}",
+        "display": "This is a GPU",
+        "show_temp": False
+    },
+    {
+        "generate": f"A GPU {TD_INSTRUCTIONS['BALANCED']}",
+        "display": "This is also aGPU",
+        "show_temp": False
+    },
+    {
         "generate": f"Close-up of GPU fans spinning rapidly as temperature readout shows 85°C during image generation tasks {TD_INSTRUCTIONS['BALANCED']}",
         "display": "GPU thermal analysis in progress",
         "show_temp": False
@@ -84,14 +99,20 @@ PROMPT_PAIRS = [
         "show_temp": False
     },
     {
-        "generate": f"Industrial facilities in Japan where silicon is formed into perfect ingots and sliced into wafers {TD_INSTRUCTIONS['ORIGINAL']}",
+        "generate": f"Industrial facilities in Japan where silicon is formed into perfect ingots and sliced into wafers {TD_INSTRUCTIONS['BALANCED']}",
         "display": "Wafer fabrication process initialized",
         "show_temp": False
     },
     {
-        "generate": f"Workers in white clean-room suits with full face coverage handling silicon wafers with specialized tools under yellow light {TD_INSTRUCTIONS['SLIGHT_DIFF']}",
+        "generate": f"Workers in white clean-room suits with full face coverage handling silicon wafers with specialized tools under yellow light {TD_INSTRUCTIONS['CREATIVE']}",
         "display": "Clean room protocol: class 10 environment",
         "show_temp": False
+    },
+     {
+        "generate": None,
+        "display": "GPU_TEMP_MONITOR",
+        "show_temp": True,
+        "target_temp": 50
     },
     {
         "generate": f"Massive ASML EUV lithography machine with complex optics shooting 13.5nm wavelength light to print circuits {TD_INSTRUCTIONS['BALANCED']}",

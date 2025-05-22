@@ -31,25 +31,29 @@ int getScreenNumber(String screenName) {
 }
 
 void setup() {
+  // Wait 4 seconds before initializing
+  delay(4000);
+  
+  // Now initialize everything
   fullScreen(P2D, getScreenNumber("secondary"));
   font = createFont("Anonymous Pro", 128);
   textFont(font);
+  
   String[] cameras = Capture.list();
   println("Available cameras:");
   printArray(cameras);
 
-  println(width, height);
-  // The camera can be initialized directly using an element
-  // from the array returned by list():
-  cam = new Capture(this, cameras[1]);
-  cam.start();
-  hint(DISABLE_DEPTH_TEST);
+  if (cameras.length > 0) {
+    int cameraIndex = cameras.length > 1 ? 1 : 0;
+    cam = new Capture(this, cameras[cameraIndex]);
+    cam.start();
+  }
 
   // Create buffers for camera and previous frame
   camBuffer = createGraphics(width, height, P2D);
   prevBuffer = createGraphics(width, height, P2D);
 
-  // Initialize OSC and listen on port 12000
+  // Initialize OSC
   oscP5 = new OscP5(this, 12000);
 }
 boolean title = false;
@@ -81,50 +85,51 @@ void draw() {
   updateTitleState();
   background(0);
 
-
-  if (title==true) {
+  if (title) {
     textAlign(CENTER, CENTER);
     textSize(150);
     text(nf(temperature, 0, 1) + "°C", width/2, height/2);
-    textSize(100);
-
-    //text("Can someone help me check my phone and message me if its working?", width/2, height/2, width, height);
   } else {
+    // Only try to use camera if it's available and running
+    if (cam != null && cam.available()) {
+      try {
+        // Store current frame in prevBuffer before updating
+        prevBuffer.beginDraw();
+        prevBuffer.clear();
+        prevBuffer.imageMode(CENTER);
+        prevBuffer.image(camBuffer, width/2, height/2);
+        prevBuffer.endDraw();
 
-    // Update camera buffer
-    if (cam.available() == true) {
-      // Store current frame in prevBuffer before updating
-      prevBuffer.beginDraw();
-      prevBuffer.clear(); // Clear previous content
-      prevBuffer.imageMode(CENTER);
-      prevBuffer.image(camBuffer, width/2, height/2);
-      prevBuffer.endDraw();
+        cam.read();
+        camBuffer.beginDraw();
+        camBuffer.clear();
+        camBuffer.imageMode(CENTER);
+        camBuffer.image(cam, width/2, height/2, width*1.775, height);
+        camBuffer.endDraw();
 
-      cam.read();
-      camBuffer.beginDraw();
-      camBuffer.clear(); // Clear previous content
-      camBuffer.imageMode(CENTER);
-      camBuffer.image(cam, width/2, height/2, width*1.775, height);
-      camBuffer.endDraw();
-
-      // Reset lerp for new transition
-      lerpAmount = 0;
+        // Reset lerp for new transition
+        lerpAmount = 0;
+      } catch (Exception e) {
+        println("Error processing camera frame: " + e.getMessage());
+      }
     }
 
-    // Display interpolated camera buffer
-    imageMode(CENTER);
-    if (lerpAmount < 1) {
-      // Use blend() for smooth transition between frames
-      lerpAmount = min(1, lerpAmount + lerpSpeed);
-      blend(prevBuffer, 0, 0, width, height,
-        0, 0, width, height, // Simplified coordinates
-        BLEND);
-      blend(camBuffer, 0, 0, width, height,
-        0, 0, width, height, // Simplified coordinates
-        MULTIPLY);
-    } else {
-      // Just show current frame when lerp is complete
-      image(camBuffer, width/2, height/2);
+    // Display logic with error handling
+    try {
+      imageMode(CENTER);
+      if (lerpAmount < 1) {
+        lerpAmount = min(1, lerpAmount + lerpSpeed);
+        blend(prevBuffer, 0, 0, width, height,
+          0, 0, width, height,
+          BLEND);
+        blend(camBuffer, 0, 0, width, height,
+          0, 0, width, height,
+          MULTIPLY);
+      } else if (camBuffer != null) {
+        image(camBuffer, width/2, height/2);
+      }
+    } catch (Exception e) {
+      println("Error displaying frame: " + e.getMessage());
     }
 
     textAlign(LEFT, CENTER);
@@ -157,9 +162,9 @@ void draw() {
 
     // Display current prompt if available
     if (currentPrompt != null && currentPrompt.length() > 0) {
-      textSize(baseTextSize * 1.5);
+      textSize(baseTextSize * 1.7);
       textAlign(CENTER, CENTER);
-      text(currentPrompt, width * 0.07, height*0.7, width*0.84, height*0.3);
+      text(currentPrompt, width * 0.07, height*0.7, width*0.93, height*0.3);
     }
   }
   // Run garbage collection every 300 frames to manage memory
@@ -188,22 +193,26 @@ void dispose() {
 void oscEvent(OscMessage msg) {
   if (msg == null) return;
 
-  if (msg.checkAddrPattern("/gpu/temperature")) {
-    temperature = msg.get(0).floatValue();
-  } else if (msg.checkAddrPattern("/gpu/utilization")) {
-    utilization = msg.get(0).floatValue();
-  } else if (msg.checkAddrPattern("/gpu/memory_used")) {
-    memoryUsed = msg.get(0).floatValue();
-  } else if (msg.checkAddrPattern("/gpu/memory_total")) {
-    memoryTotal = msg.get(0).floatValue();
-  } else if (msg.checkAddrPattern("/gpu/power_draw")) {
-    powerDraw = msg.get(0).floatValue();
-  } else if (msg.checkAddrPattern("/gpu/power_target")) {
-    powerTarget = msg.get(0).floatValue();
-  } else if (msg.checkAddrPattern("/prompt")) {
-    currentPrompt = msg.get(0).stringValue();
-  } else if (msg.checkAddrPattern("/display/mode")) {
-    title = msg.get(0).intValue() == 1;  // 1 for temperature, 0 for camera
-    lastTitleChange = millis();  // Reset the timer when changed via OSC
+  try {
+    if (msg.checkAddrPattern("/gpu/temperature")) {
+      temperature = msg.get(0).floatValue();
+    } else if (msg.checkAddrPattern("/gpu/utilization")) {
+      utilization = msg.get(0).floatValue();
+    } else if (msg.checkAddrPattern("/gpu/memory_used")) {
+      memoryUsed = msg.get(0).floatValue();
+    } else if (msg.checkAddrPattern("/gpu/memory_total")) {
+      memoryTotal = msg.get(0).floatValue();
+    } else if (msg.checkAddrPattern("/gpu/power_draw")) {
+      powerDraw = msg.get(0).floatValue();
+    } else if (msg.checkAddrPattern("/gpu/power_target")) {
+      powerTarget = msg.get(0).floatValue();
+    } else if (msg.checkAddrPattern("/prompt")) {
+      currentPrompt = msg.get(0).stringValue();
+    } else if (msg.checkAddrPattern("/display/mode")) {
+      title = msg.get(0).intValue() == 1;  // 1 for temperature, 0 for camera
+      lastTitleChange = millis();  // Reset the timer when changed via OSC
+    }
+  } catch (Exception e) {
+    println("Error in oscEvent: " + e.getMessage());
   }
 }
