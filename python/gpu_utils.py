@@ -13,19 +13,8 @@ def get_gpu_stats():
         # Parse the comma-separated values
         stats = result.stdout.strip().split(',')
         
-        # Adjust power consumption based on temperature
-        global power_Consumption
-        temp = float(stats[0])
-        
-        if temp > center:
-            power_Consumption = max(150, power_Consumption - 5)
-        else:
-            power_Consumption = min(500, power_Consumption + 5)
-
-        subprocess.run(['nvidia-smi', '-pl', str(power_Consumption)], capture_output=True)
-        
         return {
-            'temperature': temp,
+            'temperature': float(stats[0]),
             'utilization': float(stats[1]),
             'memory_used': float(stats[2]),
             'memory_total': float(stats[3]),
@@ -33,7 +22,7 @@ def get_gpu_stats():
             'power_target': float(power_Consumption)
         }
     except:
-        return None 
+        return None
 
 def control_temperature(target_temp=None):
     """Control GPU temperature to reach target temperature"""

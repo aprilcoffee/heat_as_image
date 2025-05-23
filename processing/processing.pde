@@ -209,10 +209,12 @@ void oscEvent(OscMessage msg) {
     } else if (msg.checkAddrPattern("/prompt")) {
       currentPrompt = msg.get(0).stringValue();
     } else if (msg.checkAddrPattern("/display/mode")) {
-      title = msg.get(0).intValue() == 1;  // 1 for temperature, 0 for camera
-      lastTitleChange = millis();  // Reset the timer when changed via OSC
+      title = (msg.get(0).intValue() == 1);
+      lastTitleChange = millis();
     }
   } catch (Exception e) {
     println("Error in oscEvent: " + e.getMessage());
+    println("Message address: " + msg.addrPattern());
+    println("Message type: " + msg.typetag());
   }
 }

@@ -6,6 +6,7 @@ from gpu_utils import get_gpu_stats
 from osc_handler import OSCHandler
 import config
 from prompts import get_next_prompt_pair
+import sys
 
 def main():
     get_network_info()
@@ -33,8 +34,13 @@ def main():
                     
             time.sleep(0.1)
     except KeyboardInterrupt:
+        print("\nShutting down...")
+        # Reset power limit to initial value
         subprocess.run(['nvidia-smi', '-pl', str(config.init_power_Consumption)])
-        return
+        # Stop OSC server
+        if hasattr(osc_handler, 'server'):
+            osc_handler.server.shutdown()
+        sys.exit(0)  # Make sure to exit cleanly
 
 if __name__ == "__main__":
     main() 

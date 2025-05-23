@@ -70,15 +70,19 @@ class OSCHandler:
         if args and isinstance(args[0], dict):
             prompt_pair = args[0]
             
-            # Temperature display handling
             if prompt_pair.get("show_temp", False):
-                target_temp = prompt_pair.get("target_temp", center)
+                target_temp = prompt_pair.get("target_temp")
                 stats = control_temperature(target_temp=target_temp)
                 if stats:
-                    # Send 1 to show temperature display
+                    # Make sure all numeric values are sent as floats
+                    self.processing_client.send_message("/gpu/temperature", float(stats['temperature']))
+                    self.processing_client.send_message("/gpu/power_draw", float(stats['power_draw']))
+                    self.processing_client.send_message("/gpu/power_target", float(stats['power_target']))
+                    # Send display mode as integer
                     self.processing_client.send_message("/display/mode", 1)
-                    # Send current temperature to Processing
-                    self.processing_client.send_message("/gpu/temperature", stats['temperature'])
+                    # Send temperature as string for display
+                    temp_text = str(int(stats['temperature'])) + "°C"
+                    self.processing_client.send_message("/prompt", temp_text)
                     # Send simple text to Parler (can be None or "This is a GPU")
                     display_text = prompt_pair.get("display")
                     if display_text:

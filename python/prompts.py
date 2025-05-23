@@ -24,7 +24,7 @@ PROMPT_PAIRS = [
     },
     {
         "generate": f"A GPU {TD_INSTRUCTIONS['BALANCED']}",
-        "display": "This is also aGPU",
+        "display": "This is also a GPU",
         "show_temp": False
     },
     {
@@ -76,7 +76,7 @@ PROMPT_PAIRS = [
         "generate": None,
         "display": "GPU_TEMP_MONITOR",
         "show_temp": True,
-        "target_temp": 50
+        "target_temp": 60
     },
     {
         "generate": f"A Grphaical Processing Unit {TD_INSTRUCTIONS['ORIGINAL']}",
@@ -85,7 +85,7 @@ PROMPT_PAIRS = [
     },
     {
         "generate": f"A GPU {TD_INSTRUCTIONS['BALANCED']}",
-        "display": "This is also aGPU",
+        "display": "This is also a GPU",
         "show_temp": False
     },
     {
@@ -149,7 +149,7 @@ PROMPT_PAIRS = [
         "generate": None,
         "display": "GPU_TEMP_MONITOR",
         "show_temp": True,
-        "target_temp": 50
+        "target_temp": 40
     },
     {
         "generate": f"Social media feed showing multiple AI-generated images in Studio Ghibli style based on personal photos {TD_INSTRUCTIONS['CREATIVE']}",
@@ -176,6 +176,16 @@ PROMPT_PAIRS = [
         "display": "GPU_TEMP_MONITOR",
         "show_temp": True,
         "target_temp": 50
+    },
+    {
+        "generate": f"A GPU {TD_INSTRUCTIONS['BALANCED']}",
+        "display": "This is also a GPU",
+        "show_temp": False
+    },
+    {
+        "generate": f"A GPU {TD_INSTRUCTIONS['CREATIVE']}",
+        "display": "This is also a GPU",
+        "show_temp": False
     }
 ]
 
