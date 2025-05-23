@@ -41,7 +41,7 @@ class OSCHandler:
         self.sine_time = 0
         self.transition_active = False
         self.transition_thread = None
-        self.transition_speed = 0.05  # Speed of transition
+        self.transition_speed = config.TRANSITION_SPEED  # Use speed from config
 
     def prompt_handler(self, address, *args):
         """Handle incoming OSC messages for prompt changes"""
@@ -69,8 +69,11 @@ class OSCHandler:
             # Extract step instruction from generate prompt
             for instruction in TD_INSTRUCTIONS.values():
                 if instruction in generate_prompt:
+                    # Extract the number after '=' in the instruction
                     step_instruction = int(instruction.split('=')[1])
+                    # Remove the instruction from the prompt
                     generate_prompt = generate_prompt.replace(instruction, "").strip()
+                    # Start transition to new step value
                     self.set_steps(step_instruction)
                     break
             
