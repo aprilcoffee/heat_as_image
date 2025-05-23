@@ -1,0 +1,218 @@
+import processing.video.*;
+import oscP5.*;
+Capture cam;
+OscP5 oscP5;
+float temperature = 0;
+float utilization = 0;
+float memoryUsed = 0;
+float memoryTotal = 0;
+float powerDraw = 0;
+float powerTarget = 0;
+String currentPrompt = "";
+PGraphics camBuffer; // Buffer for camera texture
+PGraphics prevBuffer; // Buffer for previous frame
+float lerpAmount = 0; // Lerp progress
+float lerpSpeed = 0.03; // Speed of transition
+PFont font;
+
+int getScreenNumber(String screenName) {
+
+  println("Current display: " + displayWidth + "x" + displayHeight);
+  switch(screenName.toLowerCase()) {
+  case "main":
+    return 1;
+  case "secondary":
+    return 2;
+  case "tablet":
+    return 3;
+  default:
+    return 1;  // default to main screen
+  }
+}
+
+void setup() {
+  // Wait 4 seconds before initializing
+  delay(4000);
+  
+  // Now initialize everything
+  fullScreen(P2D, getScreenNumber("main"));
+  font = createFont("Anonymous Pro", 128);
+  textFont(font);
+  
+  String[] cameras = Capture.list();
+  println("Available cameras:");
+  printArray(cameras);
+
+  if (cameras.length > 0) {
+    int cameraIndex = cameras.length > 1 ? 1 : 0;
+    cam = new Capture(this, cameras[cameraIndex]);
+    cam.start();
+  }
+
+  // Create buffers for camera and previous frame
+  camBuffer = createGraphics(width, height, P2D);
+  prevBuffer = createGraphics(width, height, P2D);
+
+  // Initialize OSC
+  oscP5 = new OscP5(this, 12000);
+}
+boolean title = false;
+long lastTitleChange = 0;
+final int TITLE_OFF_DURATION = 20000; // 20 seconds in milliseconds
+final int TITLE_ON_DURATION = 10000;  // 5 seconds in milliseconds
+
+void keyReleased() {
+  title = !title;
+  lastTitleChange = millis();
+}
+
+void updateTitleState() {
+  // Comment out automatic switching
+  /*
+  long currentTime = millis();
+  long elapsedTime = currentTime - lastTitleChange;
+
+  if (title && elapsedTime >= TITLE_ON_DURATION) {
+    title = false;
+    lastTitleChange = currentTime;
+  } else if (!title && elapsedTime >= TITLE_OFF_DURATION) {
+    title = true;
+    lastTitleChange = currentTime;
+  }
+  */
+}
+void draw() {
+  updateTitleState();
+  background(0);
+
+  if (title) {
+    textAlign(CENTER, CENTER);
+    textSize(150);
+    text(nf(temperature, 0, 1) + "°C", width/2, height/2);
+  } else {
+    // Only try to use camera if it's available and running
+    if (cam != null && cam.available()) {
+      try {
+        // Store current frame in prevBuffer before updating
+        prevBuffer.beginDraw();
+        prevBuffer.clear();
+        prevBuffer.imageMode(CENTER);
+        prevBuffer.image(camBuffer, width/2, height/2);
+        prevBuffer.endDraw();
+
+        cam.read();
+        camBuffer.beginDraw();
+        camBuffer.clear();
+        camBuffer.imageMode(CENTER);
+        camBuffer.image(cam, width/2, height/2, width*1.775, height);
+        camBuffer.endDraw();
+
+        // Reset lerp for new transition
+        lerpAmount = 0;
+      } catch (Exception e) {
+        println("Error processing camera frame: " + e.getMessage());
+      }
+    }
+
+    // Display logic with error handling
+    try {
+      imageMode(CENTER);
+      if (lerpAmount < 1) {
+        lerpAmount = min(1, lerpAmount + lerpSpeed);
+        blend(prevBuffer, 0, 0, width, height,
+          0, 0, width, height,
+          BLEND);
+        blend(camBuffer, 0, 0, width, height,
+          0, 0, width, height,
+          MULTIPLY);
+      } else if (camBuffer != null) {
+        image(camBuffer, width/2, height/2);
+      }
+    } catch (Exception e) {
+      println("Error displaying frame: " + e.getMessage());
+    }
+
+    textAlign(LEFT, CENTER);
+    float baseTextSize = 16;
+    float pulseAmount = 0;
+    float pulse = abs(sin(radians(frameCount % 360))); // Prevent overflow
+
+
+    // Display all GPU stats with color coding based on temperature
+    textSize(baseTextSize + pulseAmount * pulse);
+
+    // Color coding: green < 50°C, yellow 50-75°C, red > 75°C
+    if (temperature < 50) {
+      fill(0, 255, 0);
+    } else if (temperature < 75) {
+      fill(255, 255, 0);
+    } else {
+      fill(255, 0, 0);
+    }
+
+    //text("GPU Temperature: " + nf(temperature, 0, 1) + "°C", width*0.05, height*0.05);
+
+
+
+    // Reset color to white for other stats
+    fill(255);
+    //text("GPU Utilization: " + nf(utilization, 0, 1) + "%", width*0.05, height*0.1);
+    //text("Memory: " + nf(memoryUsed/1024, 0, 1) + "/" + nf(memoryTotal/1024, 0, 1) + " GB", width*0.05, height*0.15);
+    //text("Power: " + nf(powerDraw, 0, 1) + "/" + nf(powerTarget, 0, 1) + " W", width*0.05, height*0.2);
+
+    // Display current prompt if available
+    if (currentPrompt != null && currentPrompt.length() > 0) {
+      textSize(baseTextSize * 1.7);
+      textAlign(CENTER, CENTER);
+      text(currentPrompt, width * 0.07, height*0.7, width*0.93, height*0.3);
+    }
+  }
+  // Run garbage collection every 300 frames to manage memory
+  if (frameCount % 150 == 0) {
+    System.gc();
+  }
+}
+
+void dispose() {
+  // Clean up resources when sketch is closed
+  if (cam != null) {
+    cam.stop();
+  }
+  if (camBuffer != null) {
+    camBuffer.dispose();
+  }
+  if (prevBuffer != null) {
+    prevBuffer.dispose();
+  }
+  if (oscP5 != null) {
+    oscP5.stop();
+  }
+}
+
+// OSC message received
+void oscEvent(OscMessage msg) {
+  if (msg == null) return;
+
+  try {
+    if (msg.checkAddrPattern("/gpu/temperature")) {
+      temperature = msg.get(0).floatValue();
+    } else if (msg.checkAddrPattern("/gpu/utilization")) {
+      utilization = msg.get(0).floatValue();
+    } else if (msg.checkAddrPattern("/gpu/memory_used")) {
+      memoryUsed = msg.get(0).floatValue();
+    } else if (msg.checkAddrPattern("/gpu/memory_total")) {
+      memoryTotal = msg.get(0).floatValue();
+    } else if (msg.checkAddrPattern("/gpu/power_draw")) {
+      powerDraw = msg.get(0).floatValue();
+    } else if (msg.checkAddrPattern("/gpu/power_target")) {
+      powerTarget = msg.get(0).floatValue();
+    } else if (msg.checkAddrPattern("/prompt")) {
+      currentPrompt = msg.get(0).stringValue();
+    } else if (msg.checkAddrPattern("/display/mode")) {
+      title = msg.get(0).intValue() == 1;  // 1 for temperature, 0 for camera
+      lastTitleChange = millis();  // Reset the timer when changed via OSC
+    }
+  } catch (Exception e) {
+    println("Error in oscEvent: " + e.getMessage());
+  }
+}
