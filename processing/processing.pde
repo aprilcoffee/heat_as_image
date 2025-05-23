@@ -35,7 +35,7 @@ void setup() {
   delay(4000);
   
   // Now initialize everything
-  fullScreen(P2D, getScreenNumber("secondary"));
+  fullScreen(P2D, getScreenNumber("main"));
   font = createFont("Anonymous Pro", 128);
   textFont(font);
   
