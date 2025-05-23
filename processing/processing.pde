@@ -14,6 +14,9 @@ PGraphics prevBuffer; // Buffer for previous frame
 float lerpAmount = 0; // Lerp progress
 float lerpSpeed = 0.03; // Speed of transition
 PFont font;
+boolean cameraInitialized = false;
+int cameraRetryInterval = 60;  // Try to recover camera every 60 frames
+int lastCameraAttempt = 0;
 
 int getScreenNumber(String screenName) {
 
@@ -91,51 +94,51 @@ void draw() {
       textSize(150);
       text(nf(temperature, 0, 1) + "°C", width/2, height/2);
     } else {
-      // Check if camera and buffers exist
-      if (cam != null && camBuffer != null && prevBuffer != null) {
-        if (cam.available()) {
-          try {
-            // Store current frame in prevBuffer
-            prevBuffer.beginDraw();
-            prevBuffer.clear();
-            prevBuffer.imageMode(CENTER);
-            if (camBuffer != null) {  // Double check camBuffer
-              prevBuffer.image(camBuffer, width/2, height/2);
-            }
-            prevBuffer.endDraw();
-
-            cam.read();
-            
-            // Only proceed if cam read was successful
-            if (cam.width > 0) {  // Check if camera frame is valid
-              camBuffer.beginDraw();
-              camBuffer.clear();
-              camBuffer.imageMode(CENTER);
-              camBuffer.image(cam, width/2, height/2, width*1.775, height);
-              camBuffer.endDraw();
-              lerpAmount = 0;
-            }
-          } catch (Exception e) {
-            println("Error processing camera frame: " + e.getMessage());
-          }
+      // Check if camera needs recovery
+      if (!cameraInitialized || cam == null) {
+        if (frameCount - lastCameraAttempt > cameraRetryInterval) {
+          println("Attempting to recover camera...");
+          initCamera();
+          lastCameraAttempt = frameCount;
         }
+      }
 
-        // Display logic with error handling
-        try {
-          imageMode(CENTER);
-          if (lerpAmount < 1 && prevBuffer != null && camBuffer != null) {
-            blend(prevBuffer, 0, 0, width, height,
-              0, 0, width, height,
-              BLEND);
-            blend(camBuffer, 0, 0, width, height,
-              0, 0, width, height,
-              MULTIPLY);
-          } else if (camBuffer != null) {
-            image(camBuffer, width/2, height/2);
-          }
-        } catch (Exception e) {
-          println("Error displaying frame: " + e.getMessage());
+      // Try to use camera
+      try {
+        if (cameraInitialized && cam != null && cam.available()) {
+          prevBuffer.beginDraw();
+          prevBuffer.clear();
+          prevBuffer.imageMode(CENTER);
+          prevBuffer.image(camBuffer, width/2, height/2);
+          prevBuffer.endDraw();
+
+          cam.read();
+          camBuffer.beginDraw();
+          camBuffer.clear();
+          camBuffer.imageMode(CENTER);
+          camBuffer.image(cam, width/2, height/2, width*1.775, height);
+          camBuffer.endDraw();
+
+          lerpAmount = 0;
         }
+      } catch (Exception e) {
+        println("Camera error: " + e.getMessage());
+        cameraInitialized = false;  // Mark for recovery
+      }
+
+      // Always try to display something, even if camera failed
+      try {
+        imageMode(CENTER);
+        if (lerpAmount < 1 && prevBuffer != null && camBuffer != null) {
+          blend(prevBuffer, 0, 0, width, height,
+            0, 0, width, height, BLEND);
+          blend(camBuffer, 0, 0, width, height,
+            0, 0, width, height, MULTIPLY);
+        } else if (camBuffer != null) {
+          image(camBuffer, width/2, height/2);
+        }
+      } catch (Exception e) {
+        println("Display error: " + e.getMessage());
       }
     }
 
@@ -257,5 +260,30 @@ void checkCamera() {
       println("Camera not responding, attempting restart...");
       restartCamera();
     }
+  }
+}
+
+void initCamera() {
+  try {
+    if (cam != null) {
+      cam.stop();  // Stop existing camera if any
+    }
+    String[] cameras = Capture.list();
+    println("Available cameras:");
+    printArray(cameras);
+    
+    if (cameras != null && cameras.length > 0) {
+      int cameraIndex = cameras.length > 1 ? 1 : 0;
+      cam = new Capture(this, cameras[cameraIndex]);
+      cam.start();
+      cameraInitialized = true;
+      println("Camera initialized successfully");
+    } else {
+      println("No cameras available");
+      cameraInitialized = false;
+    }
+  } catch (Exception e) {
+    println("Camera initialization error: " + e.getMessage());
+    cameraInitialized = false;
   }
 }
