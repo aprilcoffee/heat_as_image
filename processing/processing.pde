@@ -164,7 +164,7 @@ void draw() {
     if (currentPrompt != null && currentPrompt.length() > 0) {
       textSize(baseTextSize * 1.7);
       textAlign(CENTER, CENTER);
-      text(currentPrompt, width * 0.07, height*0.7, width*0.93, height*0.3);
+      text(currentPrompt, width * 0.07, height*0.7, width*0.86, height*0.3);
     }
   }
   // Run garbage collection every 300 frames to manage memory

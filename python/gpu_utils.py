@@ -1,5 +1,20 @@
 import subprocess
+import time
+import re
+import random
+from pythonosc import udp_client
+from pythonosc.dispatcher import Dispatcher
+from pythonosc.osc_server import BlockingOSCUDPServer
+import threading
+import socket
+import netifaces
+import sys
 from config import power_Consumption, center
+
+# Default values
+init_power_Consumption = 450
+power_Consumption = init_power_Consumption
+target_temperature = 50  # Default target temperature
 
 def get_gpu_stats():
     try:
@@ -24,7 +39,7 @@ def get_gpu_stats():
     except:
         return None
 
-def control_temperature(target_temp=None):
+def control_temperature(target_temp=50):
     """Control GPU temperature to reach target temperature"""
     try:
         stats = get_gpu_stats()
@@ -51,4 +66,13 @@ def control_temperature(target_temp=None):
         return stats
         
     except:
-        return None 
+        return None
+
+def update_target_temperature(new_target):
+    """Update the target temperature for the control loop"""
+    global target_temperature
+    target_temperature = new_target
+
+def run_temperature_control():
+    """Run one iteration of temperature control"""
+    return control_temperature(target_temp=target_temperature) 
