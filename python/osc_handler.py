@@ -41,7 +41,7 @@ class OSCHandler:
         self.sine_time = 0
         self.transition_active = False
         self.transition_thread = None
-        self.transition_speed = 1
+        self.transition_speed = 0.05  # Speed of transition
 
     def prompt_handler(self, address, *args):
         """Handle incoming OSC messages for prompt changes"""
@@ -145,12 +145,26 @@ class OSCHandler:
             self.td_steps_client1.send_message("/steps", 25)
             self.td_steps_client2.send_message("/steps", 25)
 
-    def set_steps(self, steps):
-        """Set the current and target steps"""
-        self.current_steps_main = steps
-        self.target_steps_main = steps
-        self.td_steps_client1.send_message("/steps", self.current_steps_main)
-        self.td_steps_client2.send_message("/steps", self.current_steps_main)
+    def transition_steps(self):
+        """Smoothly transition between step values"""
         self.transition_active = True
-        self.transition_thread = threading.Thread(target=self.transition_steps)
-        self.transition_thread.start() 
+        while abs(self.current_steps_main - self.target_steps_main) > 0.1:
+            if self.current_steps_main < self.target_steps_main:
+                self.current_steps_main += self.transition_speed
+            else:
+                self.current_steps_main -= self.transition_speed
+            
+            # Send current steps to TouchDesigner
+            self.touchdesigner_client.send_message("/steps", self.current_steps_main)
+            time.sleep(0.01)
+        
+        self.current_steps_main = self.target_steps_main
+        self.transition_active = False
+
+    def set_steps(self, target_steps):
+        """Start transition to new step value"""
+        self.target_steps_main = target_steps
+        if not self.transition_active:
+            self.transition_thread = threading.Thread(target=self.transition_steps)
+            self.transition_thread.daemon = True
+            self.transition_thread.start() 
