@@ -151,18 +151,21 @@ class OSCHandler:
         current_int = int(self.current_steps_main)
         target_int = int(self.target_steps_main)
 
-        # Send steps as integers but keep transition smooth
         while current_int != target_int:
             if current_int < target_int:
                 current_int += 1
             else:
                 current_int -= 1
             
-            # Send integer steps to TouchDesigner
-            self.touchdesigner_client.send_message("/steps", current_int)
-            time.sleep(0.05)  # Adjust timing for smooth integer transitions
+            # Use config ports and send to both TD clients
+            self.td_steps_client1.send_message("/steps", current_int)
+            self.td_steps_client2.send_message("/steps", current_int)
+            time.sleep(config.TRANSITION_DELAY)  # Use config delay
         
+        # Final value
         self.current_steps_main = self.target_steps_main
+        self.td_steps_client1.send_message("/steps", int(self.target_steps_main))
+        self.td_steps_client2.send_message("/steps", int(self.target_steps_main))
         self.transition_active = False
 
     def set_steps(self, step_instruction):
