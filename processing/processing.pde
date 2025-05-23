@@ -36,12 +36,12 @@ int getScreenNumber(String screenName) {
 void setup() {
   // Wait 4 seconds before initializing
   delay(4000);
-  
+
   // Now initialize everything
   fullScreen(P2D, getScreenNumber("main"));
   font = createFont("Anonymous Pro", 128);
   textFont(font);
-  
+
   String[] cameras = Capture.list();
   println("Available cameras:");
   printArray(cameras);
@@ -73,16 +73,16 @@ void updateTitleState() {
   // Comment out automatic switching
   /*
   long currentTime = millis();
-  long elapsedTime = currentTime - lastTitleChange;
-
-  if (title && elapsedTime >= TITLE_ON_DURATION) {
-    title = false;
-    lastTitleChange = currentTime;
-  } else if (!title && elapsedTime >= TITLE_OFF_DURATION) {
-    title = true;
-    lastTitleChange = currentTime;
-  }
-  */
+   long elapsedTime = currentTime - lastTitleChange;
+   
+   if (title && elapsedTime >= TITLE_ON_DURATION) {
+   title = false;
+   lastTitleChange = currentTime;
+   } else if (!title && elapsedTime >= TITLE_OFF_DURATION) {
+   title = true;
+   lastTitleChange = currentTime;
+   }
+   */
 }
 void draw() {
   try {
@@ -121,7 +121,8 @@ void draw() {
 
           lerpAmount = 0;
         }
-      } catch (Exception e) {
+      }
+      catch (Exception e) {
         println("Camera error: " + e.getMessage());
         cameraInitialized = false;  // Mark for recovery
       }
@@ -137,51 +138,54 @@ void draw() {
         } else if (camBuffer != null) {
           image(camBuffer, width/2, height/2);
         }
-      } catch (Exception e) {
+      }
+      catch (Exception e) {
         println("Display error: " + e.getMessage());
       }
+
+
+      // Update lerp amount
+      if (lerpAmount < 1) {
+        lerpAmount = min(1, lerpAmount + lerpSpeed);
+      }
+
+      textAlign(LEFT, CENTER);
+      float baseTextSize = 16;
+      float pulseAmount = 0;
+      float pulse = abs(sin(radians(frameCount % 360))); // Prevent overflow
+
+
+      // Display all GPU stats with color coding based on temperature
+      textSize(baseTextSize + pulseAmount * pulse);
+
+      // Color coding: green < 50°C, yellow 50-75°C, red > 75°C
+      if (temperature < 50) {
+        fill(0, 255, 0);
+      } else if (temperature < 75) {
+        fill(255, 255, 0);
+      } else {
+        fill(255, 0, 0);
+      }
+
+      //text("GPU Temperature: " + nf(temperature, 0, 1) + "°C", width*0.05, height*0.05);
+
+
+
+      // Reset color to white for other stats
+      fill(255);
+      //text("GPU Utilization: " + nf(utilization, 0, 1) + "%", width*0.05, height*0.1);
+      //text("Memory: " + nf(memoryUsed/1024, 0, 1) + "/" + nf(memoryTotal/1024, 0, 1) + " GB", width*0.05, height*0.15);
+      //text("Power: " + nf(powerDraw, 0, 1) + "/" + nf(powerTarget, 0, 1) + " W", width*0.05, height*0.2);
+
+      // Display current prompt if available
+      if (currentPrompt != null && currentPrompt.length() > 0) {
+        textSize(baseTextSize * 1.7);
+        textAlign(CENTER, CENTER);
+        text(currentPrompt, width * 0.07, height*0.7, width*0.86, height*0.3);
+      }
     }
-
-    // Update lerp amount
-    if (lerpAmount < 1) {
-      lerpAmount = min(1, lerpAmount + lerpSpeed);
-    }
-
-    textAlign(LEFT, CENTER);
-    float baseTextSize = 16;
-    float pulseAmount = 0;
-    float pulse = abs(sin(radians(frameCount % 360))); // Prevent overflow
-
-
-    // Display all GPU stats with color coding based on temperature
-    textSize(baseTextSize + pulseAmount * pulse);
-
-    // Color coding: green < 50°C, yellow 50-75°C, red > 75°C
-    if (temperature < 50) {
-      fill(0, 255, 0);
-    } else if (temperature < 75) {
-      fill(255, 255, 0);
-    } else {
-      fill(255, 0, 0);
-    }
-
-    //text("GPU Temperature: " + nf(temperature, 0, 1) + "°C", width*0.05, height*0.05);
-
-
-
-    // Reset color to white for other stats
-    fill(255);
-    //text("GPU Utilization: " + nf(utilization, 0, 1) + "%", width*0.05, height*0.1);
-    //text("Memory: " + nf(memoryUsed/1024, 0, 1) + "/" + nf(memoryTotal/1024, 0, 1) + " GB", width*0.05, height*0.15);
-    //text("Power: " + nf(powerDraw, 0, 1) + "/" + nf(powerTarget, 0, 1) + " W", width*0.05, height*0.2);
-
-    // Display current prompt if available
-    if (currentPrompt != null && currentPrompt.length() > 0) {
-      textSize(baseTextSize * 1.7);
-      textAlign(CENTER, CENTER);
-      text(currentPrompt, width * 0.07, height*0.7, width*0.86, height*0.3);
-    }
-  } catch (Exception e) {
+  }
+  catch (Exception e) {
     println("Error in draw(): " + e.getMessage());
   }
   // Run garbage collection every 300 frames to manage memory
@@ -229,7 +233,8 @@ void oscEvent(OscMessage msg) {
       title = (msg.get(0).intValue() == 1);
       lastTitleChange = millis();
     }
-  } catch (Exception e) {
+  }
+  catch (Exception e) {
     println("Error in oscEvent: " + e.getMessage());
     println("Message address: " + msg.addrPattern());
     println("Message type: " + msg.typetag());
@@ -248,7 +253,8 @@ void restartCamera() {
       cam = new Capture(this, cameras[cameraIndex]);
       cam.start();
     }
-  } catch (Exception e) {
+  }
+  catch (Exception e) {
     println("Error restarting camera: " + e.getMessage());
   }
 }
@@ -271,7 +277,7 @@ void initCamera() {
     String[] cameras = Capture.list();
     println("Available cameras:");
     printArray(cameras);
-    
+
     if (cameras != null && cameras.length > 0) {
       int cameraIndex = cameras.length > 1 ? 1 : 0;
       cam = new Capture(this, cameras[cameraIndex]);
@@ -282,7 +288,8 @@ void initCamera() {
       println("No cameras available");
       cameraInitialized = false;
     }
-  } catch (Exception e) {
+  }
+  catch (Exception e) {
     println("Camera initialization error: " + e.getMessage());
     cameraInitialized = false;
   }
