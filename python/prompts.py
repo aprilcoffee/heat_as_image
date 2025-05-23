@@ -21,7 +21,7 @@ PROMPT_PAIRS = [
         "target_temp": 75
     },
     {
-        "generate": f"A Grphaical Processing Unit {TD_INSTRUCTIONS['ORIGINAL']}",
+        "generate": f"A Graphical Processing Unit {TD_INSTRUCTIONS['ORIGINAL']}", # Fixed typo in "Graphical"
         "display": "This is a GPU",
         "show_temp": False
     },
@@ -82,7 +82,7 @@ PROMPT_PAIRS = [
         "target_temp": 60
     },
     {
-        "generate": f"A Grphaical Processing Unit {TD_INSTRUCTIONS['ORIGINAL']}",
+        "generate": f"A Graphical Processing Unit {TD_INSTRUCTIONS['ORIGINAL']}", # Fixed typo in "Graphical"
         "display": "This is a GPU",
         "show_temp": False
     },
