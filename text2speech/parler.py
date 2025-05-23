@@ -61,15 +61,13 @@ class ParlerHandler:
                 self.response_client.send_message("/audio_complete", text)
                 
                 print("Playing audio...")
-                # Stop any currently playing audio
-                if self.current_audio_thread and self.current_audio_thread.is_alive():
-                    sd.stop()
-                    self.current_audio_thread.join(timeout=1.0)
+                def play_audio():
+                    sd.play(audio_arr, self.model.config.sampling_rate)
+                    sd.wait()
+                    print("Audio played successfully!")
                 
-                # Create new audio thread
-                self.current_audio_thread = threading.Thread(target=self.play_audio, args=(audio_arr,))
-                self.current_audio_thread.daemon = True  # Mark as daemon thread
-                self.current_audio_thread.start()
+                audio_thread = threading.Thread(target=play_audio)
+                audio_thread.start()
                 
             except Exception as e:
                 print(f"Error occurred: {e}")
