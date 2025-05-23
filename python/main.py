@@ -2,7 +2,7 @@ import time
 import threading
 import subprocess
 from network_utils import get_network_info
-from gpu_utils import get_gpu_stats
+from gpu_utils import get_gpu_stats, run_temperature_control, update_target_temperature
 from osc_handler import OSCHandler
 import config
 from prompts import get_next_prompt_pair
@@ -11,6 +11,7 @@ import sys
 def main():
     get_network_info()
     
+    # Initialize OSC handler
     osc_handler = OSCHandler()
     
     # Start OSC server in a separate thread
@@ -21,6 +22,15 @@ def main():
     prompt_interval = 0
     try:
         while True:
+            # Run temperature control
+            stats = run_temperature_control()
+            
+            if stats:
+                # Send temperature data to Processing
+                osc_handler.processing_client.send_message("/gpu/temperature", float(stats['temperature']))
+                osc_handler.processing_client.send_message("/gpu/power_draw", float(stats['power_draw']))
+                osc_handler.processing_client.send_message("/gpu/power_target", float(stats['power_target']))
+            
             # Get GPU stats and send via OSC
             stats = get_gpu_stats()
             osc_handler.send_gpu_stats(stats)
@@ -33,6 +43,7 @@ def main():
                 prompt_interval = 0
                     
             time.sleep(0.1)
+            
     except KeyboardInterrupt:
         print("\nShutting down...")
         # Reset power limit to initial value

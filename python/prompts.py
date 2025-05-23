@@ -7,6 +7,9 @@ TD_INSTRUCTIONS = {
     "HEAVY_DIFF": "::steps=10"    # Mostly diffused with slight original
 }
 
+# Initialize target temperature
+TARGET_TEMPERATURE = 50
+
 # Detailed narrative prompts that tell the thesis story chronologically
 PROMPT_PAIRS = [
     # Opening sequence
@@ -18,7 +21,7 @@ PROMPT_PAIRS = [
         "target_temp": 75
     },
     {
-        "generate": f"A Grphaical Processing Unit {TD_INSTRUCTIONS['ORIGINAL']}",
+        "generate": f"A Graphical Processing Unit {TD_INSTRUCTIONS['ORIGINAL']}", # Fixed typo in "Graphical"
         "display": "This is a GPU",
         "show_temp": False
     },
@@ -29,37 +32,37 @@ PROMPT_PAIRS = [
     },
     {
         "generate": f"A computer screen displays Python code: 'from diffusers import DiffusionPipeline, import torch, model = stable-diffusion-v1-5' with execution errors visible {TD_INSTRUCTIONS['SLIGHT_DIFF']}",
-        "display": "Initializing diffusion pipeline dependencies",
+        "display": "Diffusion pipeline dependencies",
         "show_temp": False
     },
     {
         "generate": f"Multiple windows open on a desktop showing AI-generated landscapes being processed through additional filters in Processing software {TD_INSTRUCTIONS['HEAVY_DIFF']}",
-        "display": "Processing: post-generation image analysis",
+        "display": "Post-generation image analysis",
         "show_temp": False
     },
     {
         "generate": f"A student tries to run Stable Diffusion on an outdated laptop, receiving error messages about insufficient VRAM and CUDA compatibility {TD_INSTRUCTIONS['BALANCED']}",
-        "display": "CUDA ERROR: insufficient VRAM detected",
+        "display": "Insufficient VRAM detected",
         "show_temp": False
     },
     {
         "generate": f"Computer screen showing progressive iterations of an image feedback loop, with purple noise patterns becoming increasingly dominant {TD_INSTRUCTIONS['CREATIVE']}",
-        "display": "Feedback loop iteration: pattern analysis",
+        "display": "Pattern analysis",
         "show_temp": False
     },
     {
         "generate": f"Researchers examine Hugging Face documentation and code diagrams of the Stable Diffusion pipeline components {TD_INSTRUCTIONS['BALANCED']}",
-        "display": "System architecture analysis: pipeline components",
+        "display": "System architecture analysis",
         "show_temp": False
     },
     {
         "generate": f"Testing interface showing CLIP model scoring different faces: 87% match between Asian face and 'dumpling', 92% match between white face and 'schnitzel' {TD_INSTRUCTIONS['CREATIVE']}",
-        "display": "CLIP model: semantic analysis report",
+        "display": "Semantic analysis report",
         "show_temp": False
     },
     {
         "generate": f"Visualization of word embeddings and image features as points in a high-dimensional space, with similar concepts clustering together {TD_INSTRUCTIONS['CREATIVE']}",
-        "display": "Vector space mapping: semantic clusters",
+        "display": "Vector space mapping",
         "show_temp": False
     },
     {
@@ -79,7 +82,7 @@ PROMPT_PAIRS = [
         "target_temp": 60
     },
     {
-        "generate": f"A Grphaical Processing Unit {TD_INSTRUCTIONS['ORIGINAL']}",
+        "generate": f"A Graphical Processing Unit {TD_INSTRUCTIONS['ORIGINAL']}", # Fixed typo in "Graphical"
         "display": "This is a GPU",
         "show_temp": False
     },
@@ -105,23 +108,17 @@ PROMPT_PAIRS = [
     },
     {
         "generate": f"Workers in white clean-room suits with full face coverage handling silicon wafers with specialized tools under yellow light {TD_INSTRUCTIONS['CREATIVE']}",
-        "display": "Clean room protocol: class 10 environment",
+        "display": "Clean room protocol",
         "show_temp": False
-    },
-     {
-        "generate": None,
-        "display": "GPU_TEMP_MONITOR",
-        "show_temp": True,
-        "target_temp": 50
     },
     {
         "generate": f"Massive ASML EUV lithography machine with complex optics shooting 13.5nm wavelength light to print circuits {TD_INSTRUCTIONS['BALANCED']}",
-        "display": "EUV lithography: λ=13.5nm",
+        "display": "EUV lithography=13.5nm",
         "show_temp": False
     },
     {
         "generate": f"Aerial view of TSMC's massive fabrication plants in Hsinchu Science Park, Taiwan {TD_INSTRUCTIONS['HEAVY_DIFF']}",
-        "display": "Semiconductor fab: 5nm process node",
+        "display": "Semiconductor fab",
         "show_temp": False
     },
     {
@@ -130,10 +127,25 @@ PROMPT_PAIRS = [
         "show_temp": False
     },
     {
+        "generate": f"A high-end GPU running at maximum capacity, fans spinning rapidly to dissipate heat {TD_INSTRUCTIONS['BALANCED']}",
+        "display": "GPU thermal management active",
+        "show_temp": False
+    },
+    {
+        "generate": f"A GPU running at maximum capacity, fans spinning rapidly to dissipate heat {TD_INSTRUCTIONS['CREATIVE']}",
+        "display": "thermal management active",
+        "show_temp": False
+    },
+    {
         "generate": None,
         "display": "GPU_TEMP_MONITOR",
         "show_temp": True,
         "target_temp": 50
+    },
+    {
+        "generate": f"A GPU {TD_INSTRUCTIONS['CREATIVE']}",
+        "display": "This is also a GPU",
+        "show_temp": False
     },
     {
         "generate": f"Map showing Taiwan's strategic position with overlay of semiconductor supply routes and military tensions {TD_INSTRUCTIONS['BALANCED']}",
@@ -142,9 +154,14 @@ PROMPT_PAIRS = [
     },
     {
         "generate": f"NVIDIA CEO Jensen Huang meeting with TSMC founder Morris Chang, sharing tofu pudding as a symbolic gesture {TD_INSTRUCTIONS['SLIGHT_DIFF']}",
-        "display": "Strategic partnership: GPU-FAB integration",
+        "display": "Strategic partnership",
         "show_temp": False
     }, 
+    {
+        "generate": f"Industrial furnaces at The Quartz Corp and Covia Corp facilities purify silicon to 99.9999999% purity levels through multiple refinement processes {TD_INSTRUCTIONS['HEAVY_DIFF']}",
+        "display": "The purest material on Earth",
+        "show_temp": False
+    },
     {
         "generate": None,
         "display": "GPU_TEMP_MONITOR",
@@ -153,11 +170,11 @@ PROMPT_PAIRS = [
     },
     {
         "generate": f"Social media feed showing multiple AI-generated images in Studio Ghibli style based on personal photos {TD_INSTRUCTIONS['CREATIVE']}",
-        "display": "Style transfer algorithm: analyzing results",
+        "display": "Style transfer algorithm",
         "show_temp": False
     },
     {
-        "generate": f"Exhibition showing artworks by Sam Ghantous and Nadim Abbas addressing semiconductor production through installations {TD_INSTRUCTIONS['BALANCED']}",
+        "generate": f"Exhibition showing artworks addressing semiconductor production through installations {TD_INSTRUCTIONS['BALANCED']}",
         "display": "Hardware visualization protocol",
         "show_temp": False
     },
@@ -183,8 +200,74 @@ PROMPT_PAIRS = [
         "show_temp": False
     },
     {
-        "generate": f"A GPU {TD_INSTRUCTIONS['CREATIVE']}",
+        "generate": f"A computer GPU {TD_INSTRUCTIONS['HEAVY_DIFF']}",
         "display": "This is also a GPU",
+        "show_temp": False
+    },
+    {
+        "generate": f"Automated polishing machines smooth silicon wafers to atomic-level flatness in ultra-clean manufacturing environments {TD_INSTRUCTIONS['SLIGHT_DIFF']}",
+        "display": "Polishing wafers to mirror-perfect surfaces",
+        "show_temp": False
+    },
+    {
+        "generate": f"NVIDIA engineers in Santa Clara designing GPU architecture layouts on computer screens, creating the blueprint for RTX 4090 chips {TD_INSTRUCTIONS['CREATIVE']}",
+        "display": "NVIDIA designs the GPU architecture but doesn't manufacture",
+        "show_temp": False
+    },
+    {
+        "generate": f"Chemical etching and deposition processes adding multiple layers to create three-dimensional transistor structures {TD_INSTRUCTIONS['CREATIVE']}",
+        "display": "Building 3D transistor structures through hundreds of process steps",
+        "show_temp": False
+    },
+    {
+        "generate": f"Automated testing equipment checking each GPU die for functionality before packaging {TD_INSTRUCTIONS['HEAVY_DIFF']}",
+        "display": "Testing billions of transistors for defects",
+        "show_temp": False
+    },
+    {
+        "generate": f"GPU dies being cut from wafers and sorted - functional chips separated from defective ones {TD_INSTRUCTIONS['SLIGHT_DIFF']}",
+        "display": "Yield sorting determines which chips pass quality control",
+        "show_temp": False
+    },
+    {
+        "generate": f"Completed GPU chips being shipped from Taiwan to graphics card manufacturers worldwide {TD_INSTRUCTIONS['HEAVY_DIFF']}",
+        "display": "Global distribution of finished semiconductors",
+        "show_temp": False
+    },
+    {
+        "generate": f"ASUS, MSI, and EVGA facilities installing GPU chips onto circuit boards with power connectors and cooling systems {TD_INSTRUCTIONS['BALANCED']}",
+        "display": "Graphics card manufacturers add cooling and power systems",
+        "show_temp": False
+    },
+    {
+        "generate": None,
+        "display": "GPU_TEMP_MONITOR",
+        "show_temp": True,
+        "target_temp": 60
+    },
+    {
+        "generate": f"A GPU {TD_INSTRUCTIONS['BALANCED']}",
+        "display": "This is also a GPU",
+        "show_temp": False
+    },
+    {
+        "generate": f"A computer GPU {TD_INSTRUCTIONS['SLIGHT_DIFF']}",
+        "display": "This is also a GPU",
+        "show_temp": False
+    },
+    {
+        "generate": f"Shipping containers loaded with thousands of graphics cards departing Asian ports for global distribution {TD_INSTRUCTIONS['HEAVY_DIFF']}",
+        "display": "Global supply chain delivers GPUs to end users",
+        "show_temp": False
+    },
+    {
+        "generate": f"Consumer unboxing an RTX 4090 graphics card and installing it into a PC for AI image generation work {TD_INSTRUCTIONS['BALANCED']}",
+        "display": "From Spruce Pine sand to AI artist's workstation",
+        "show_temp": False
+    },
+    {
+        "generate": f"The installed RTX 4090 running Stable Diffusion code, generating heat as it processes the same seven lines of code from the thesis beginning {TD_INSTRUCTIONS['BALANCED']}",
+        "display": "The circle completes: Sand becomes heat through computation",
         "show_temp": False
     }
 ]

@@ -7,7 +7,7 @@ import random
 import threading
 import time
 import math
-from gpu_utils import control_temperature
+from gpu_utils import update_target_temperature
 from config import center
 
 class OSCHandler:
@@ -43,58 +43,23 @@ class OSCHandler:
         self.transition_thread = None
         self.transition_speed = 1
 
-    def transition_steps(self):
-        """Smoothly transition between current and target steps"""
-        while self.transition_active:
-            # Handle main steps (port 7001)
-            if self.current_steps_main != self.target_steps_main:
-                if self.current_steps_main < self.target_steps_main:
-                    self.current_steps_main = min(self.current_steps_main + self.transition_speed, self.target_steps_main)
-                else:
-                    self.current_steps_main = max(self.current_steps_main - self.transition_speed, self.target_steps_main)
-                
-                self.td_steps_client1.send_message("/steps", self.current_steps_main)
-            
-            # Handle sine wave steps (port 7002)
-            self.sine_time += self.sine_speed
-            sine_value = self.sine_center + self.sine_amplitude * math.sin(self.sine_time)
-            self.td_steps_client2.send_message("/steps", sine_value)
-            
-            time.sleep(0.05)
-            
-            if self.current_steps_main == self.target_steps_main:
-                self.transition_active = False
-
     def prompt_handler(self, address, *args):
         """Handle incoming OSC messages for prompt changes"""
         if args and isinstance(args[0], dict):
             prompt_pair = args[0]
             
             if prompt_pair.get("show_temp", False):
-                target_temp = prompt_pair.get("target_temp")
-                stats = control_temperature(target_temp=target_temp)
-                if stats:
-                    # Make sure all numeric values are sent as floats
-                    self.processing_client.send_message("/gpu/temperature", float(stats['temperature']))
-                    self.processing_client.send_message("/gpu/power_draw", float(stats['power_draw']))
-                    self.processing_client.send_message("/gpu/power_target", float(stats['power_target']))
-                    # Send display mode as integer
-                    self.processing_client.send_message("/display/mode", 1)
-                    # Send temperature as string for display
-                    temp_text = str(int(stats['temperature'])) + "°C"
-                    self.processing_client.send_message("/prompt", temp_text)
-                    # Send simple text to Parler (can be None or "This is a GPU")
-                    display_text = prompt_pair.get("display")
-                    if display_text:
-                        self.parler_client.send_message("/prompt", display_text)
-                    
-                    # Set steps to ORIGINAL during temperature display
-                    self.set_steps(50)  # ORIGINAL steps value
+                target_temp = prompt_pair.get("target_temp", 50)
+                update_target_temperature(target_temp)
+                # Display mode will be handled by the continuous temperature control
+                self.processing_client.send_message("/display/mode", 1)
+                # Send simple text to Parler (can be None or "This is a GPU")
+                display_text = prompt_pair.get("display")
+                if display_text:
+                    self.parler_client.send_message("/prompt", display_text)
                 return
             
             # Normal temperature control
-            stats = control_temperature(target_temp=None)
-            # Send 0 to show camera view
             self.processing_client.send_message("/display/mode", 0)
             
             # Handle regular prompt pair
