@@ -83,39 +83,20 @@ class OSCHandler:
             # Send display prompt to Processing
             self.processing_client.send_message("/prompt", display_prompt)
 
-    def audio_complete_handler(self, address, *args):
-        """Handle audio completion messages"""
-        if args and isinstance(args[0], str):
-            if self.current_steps_main == self.target_steps_main:  # Verify it's the same prompt
-                print(f"Audio complete, sending to visual clients: {self.current_steps_main}")
-                self.processing_client.send_message("/prompt", self.current_steps_main)
-                self.touchdesigner_client.send_message("/prompt", self.current_steps_main)
-
     def start_osc_server(self):
         """Start OSC server to listen for incoming messages"""
         dispatcher = Dispatcher()
         dispatcher.map("/changePrompt", self.prompt_handler)
         
-        # Create separate server for Parler responses
-        parler_dispatcher = Dispatcher()
-        parler_dispatcher.map("/audio_complete", self.audio_complete_handler)
-        
         server = BlockingOSCUDPServer(
             (config.OSC_SERVER_IP, config.OSC_SERVER_PORT), 
             dispatcher
         )
-        parler_server = BlockingOSCUDPServer(
-            (config.OSC_SERVER_IP, config.PARLER_RESPONSE_PORT), 
-            parler_dispatcher
-        )
         
-        # Start both servers in threads
+        # Just start the main server thread
         server_thread = threading.Thread(target=server.serve_forever)
-        parler_thread = threading.Thread(target=parler_server.serve_forever)
         server_thread.daemon = True
-        parler_thread.daemon = True
         server_thread.start()
-        parler_thread.start()
 
     def send_gpu_stats(self, stats):
         """Send GPU stats to Processing and TouchDesigner"""
