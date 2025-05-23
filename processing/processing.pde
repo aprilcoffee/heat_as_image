@@ -82,54 +82,66 @@ void updateTitleState() {
   */
 }
 void draw() {
-  updateTitleState();
-  background(0);
+  try {
+    updateTitleState();
+    background(0);
 
-  if (title) {
-    textAlign(CENTER, CENTER);
-    textSize(150);
-    text(nf(temperature, 0, 1) + "°C", width/2, height/2);
-  } else {
-    // Only try to use camera if it's available and running
-    if (cam != null && cam.available()) {
-      try {
-        // Store current frame in prevBuffer before updating
-        prevBuffer.beginDraw();
-        prevBuffer.clear();
-        prevBuffer.imageMode(CENTER);
-        prevBuffer.image(camBuffer, width/2, height/2);
-        prevBuffer.endDraw();
+    if (title) {
+      textAlign(CENTER, CENTER);
+      textSize(150);
+      text(nf(temperature, 0, 1) + "°C", width/2, height/2);
+    } else {
+      // Check if camera and buffers exist
+      if (cam != null && camBuffer != null && prevBuffer != null) {
+        if (cam.available()) {
+          try {
+            // Store current frame in prevBuffer
+            prevBuffer.beginDraw();
+            prevBuffer.clear();
+            prevBuffer.imageMode(CENTER);
+            if (camBuffer != null) {  // Double check camBuffer
+              prevBuffer.image(camBuffer, width/2, height/2);
+            }
+            prevBuffer.endDraw();
 
-        cam.read();
-        camBuffer.beginDraw();
-        camBuffer.clear();
-        camBuffer.imageMode(CENTER);
-        camBuffer.image(cam, width/2, height/2, width*1.775, height);
-        camBuffer.endDraw();
+            cam.read();
+            
+            // Only proceed if cam read was successful
+            if (cam.width > 0) {  // Check if camera frame is valid
+              camBuffer.beginDraw();
+              camBuffer.clear();
+              camBuffer.imageMode(CENTER);
+              camBuffer.image(cam, width/2, height/2, width*1.775, height);
+              camBuffer.endDraw();
+              lerpAmount = 0;
+            }
+          } catch (Exception e) {
+            println("Error processing camera frame: " + e.getMessage());
+          }
+        }
 
-        // Reset lerp for new transition
-        lerpAmount = 0;
-      } catch (Exception e) {
-        println("Error processing camera frame: " + e.getMessage());
+        // Display logic with error handling
+        try {
+          imageMode(CENTER);
+          if (lerpAmount < 1 && prevBuffer != null && camBuffer != null) {
+            blend(prevBuffer, 0, 0, width, height,
+              0, 0, width, height,
+              BLEND);
+            blend(camBuffer, 0, 0, width, height,
+              0, 0, width, height,
+              MULTIPLY);
+          } else if (camBuffer != null) {
+            image(camBuffer, width/2, height/2);
+          }
+        } catch (Exception e) {
+          println("Error displaying frame: " + e.getMessage());
+        }
       }
     }
 
-    // Display logic with error handling
-    try {
-      imageMode(CENTER);
-      if (lerpAmount < 1) {
-        lerpAmount = min(1, lerpAmount + lerpSpeed);
-        blend(prevBuffer, 0, 0, width, height,
-          0, 0, width, height,
-          BLEND);
-        blend(camBuffer, 0, 0, width, height,
-          0, 0, width, height,
-          MULTIPLY);
-      } else if (camBuffer != null) {
-        image(camBuffer, width/2, height/2);
-      }
-    } catch (Exception e) {
-      println("Error displaying frame: " + e.getMessage());
+    // Update lerp amount
+    if (lerpAmount < 1) {
+      lerpAmount = min(1, lerpAmount + lerpSpeed);
     }
 
     textAlign(LEFT, CENTER);
@@ -166,6 +178,8 @@ void draw() {
       textAlign(CENTER, CENTER);
       text(currentPrompt, width * 0.07, height*0.7, width*0.86, height*0.3);
     }
+  } catch (Exception e) {
+    println("Error in draw(): " + e.getMessage());
   }
   // Run garbage collection every 300 frames to manage memory
   if (frameCount % 150 == 0) {
@@ -216,5 +230,32 @@ void oscEvent(OscMessage msg) {
     println("Error in oscEvent: " + e.getMessage());
     println("Message address: " + msg.addrPattern());
     println("Message type: " + msg.typetag());
+  }
+}
+
+// Add camera restart function
+void restartCamera() {
+  try {
+    if (cam != null) {
+      cam.stop();
+    }
+    String[] cameras = Capture.list();
+    if (cameras.length > 0) {
+      int cameraIndex = cameras.length > 1 ? 1 : 0;
+      cam = new Capture(this, cameras[cameraIndex]);
+      cam.start();
+    }
+  } catch (Exception e) {
+    println("Error restarting camera: " + e.getMessage());
+  }
+}
+
+// Add periodic camera check
+void checkCamera() {
+  if (frameCount % 300 == 0) {  // Check every 300 frames
+    if (cam == null || !cam.available()) {
+      println("Camera not responding, attempting restart...");
+      restartCamera();
+    }
   }
 }
