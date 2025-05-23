@@ -69,11 +69,8 @@ class OSCHandler:
             # Extract step instruction from generate prompt
             for instruction in TD_INSTRUCTIONS.values():
                 if instruction in generate_prompt:
-                    # Extract the number after '=' in the instruction
                     step_instruction = int(instruction.split('=')[1])
-                    # Remove the instruction from the prompt
                     generate_prompt = generate_prompt.replace(instruction, "").strip()
-                    # Start transition to new step value
                     self.set_steps(step_instruction)
                     break
             
@@ -151,22 +148,26 @@ class OSCHandler:
     def transition_steps(self):
         """Smoothly transition between step values"""
         self.transition_active = True
-        while abs(self.current_steps_main - self.target_steps_main) > 0.1:
-            if self.current_steps_main < self.target_steps_main:
-                self.current_steps_main += self.transition_speed
+        current_int = int(self.current_steps_main)
+        target_int = int(self.target_steps_main)
+
+        # Send steps as integers but keep transition smooth
+        while current_int != target_int:
+            if current_int < target_int:
+                current_int += 1
             else:
-                self.current_steps_main -= self.transition_speed
+                current_int -= 1
             
-            # Send current steps to TouchDesigner
-            self.touchdesigner_client.send_message("/steps", self.current_steps_main)
-            time.sleep(0.01)
+            # Send integer steps to TouchDesigner
+            self.touchdesigner_client.send_message("/steps", current_int)
+            time.sleep(0.05)  # Adjust timing for smooth integer transitions
         
         self.current_steps_main = self.target_steps_main
         self.transition_active = False
 
-    def set_steps(self, target_steps):
+    def set_steps(self, step_instruction):
         """Start transition to new step value"""
-        self.target_steps_main = target_steps
+        self.target_steps_main = step_instruction
         if not self.transition_active:
             self.transition_thread = threading.Thread(target=self.transition_steps)
             self.transition_thread.daemon = True
