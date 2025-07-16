@@ -21,22 +21,27 @@ PROMPT_PAIRS = [
         "target_temp": 75
     },
     {
-        "generate": f"A Graphical Processing Unit {TD_INSTRUCTIONS['ORIGINAL']}", # Fixed typo in "Graphical"
+        "generate": f"A Graphic Processing Unit {TD_INSTRUCTIONS['ORIGINAL']}", # Fixed typo in "Graphical"
         "display": "This is a GPU",
         "show_temp": False
     },
     {
-        "generate": f"A GPU {TD_INSTRUCTIONS['BALANCED']}",
+        "generate": f"A Graphic Processing Unit {TD_INSTRUCTIONS['BALANCED']}",
         "display": "This is also a GPU",
         "show_temp": False
     },
     {
-        "generate": f"A computer screen displays Python code: 'from diffusers import DiffusionPipeline, import torch, model = stable-diffusion-v1-5' with execution errors visible {TD_INSTRUCTIONS['SLIGHT_DIFF']}",
+        "generate": f"A Graphic Processing Unit from a bird-view perspective.{TD_INSTRUCTIONS['HEAVY_DIFF']}",
+        "display": "This is also a GPU",
+        "show_temp": False
+    },
+    {
+        "generate": f"A computer screen displays Python code: 'from diffusers import DiffusionPipeline, import stable-diffusion-v1-5 {TD_INSTRUCTIONS['SLIGHT_DIFF']}",
         "display": "Diffusion pipeline dependencies",
         "show_temp": False
     },
     {
-        "generate": f"Multiple windows open on a desktop showing AI-generated landscapes being processed through additional filters in Processing software {TD_INSTRUCTIONS['HEAVY_DIFF']}",
+        "generate": f"Multiple windows open on a desktop showing AI-generated landscapes being processed {TD_INSTRUCTIONS['HEAVY_DIFF']}",
         "display": "Post-generation image analysis",
         "show_temp": False
     },
@@ -148,7 +153,7 @@ PROMPT_PAIRS = [
         "show_temp": False
     },
     {
-        "generate": f"Map showing Taiwan's strategic position with overlay of semiconductor supply routes and military tensions {TD_INSTRUCTIONS['BALANCED']}",
+        "generate": f"Map showing strategic position with overlay of semiconductor supply routes and military tensions {TD_INSTRUCTIONS['BALANCED']}",
         "display": "Supply chain topology analysis",
         "show_temp": False
     },
@@ -205,12 +210,12 @@ PROMPT_PAIRS = [
         "show_temp": False
     },
     {
-        "generate": f"Automated polishing machines smooth silicon wafers to atomic-level flatness in ultra-clean manufacturing environments {TD_INSTRUCTIONS['SLIGHT_DIFF']}",
+        "generate": f"Automated polishing machines smooth silicon wafers to atomic-level flatness in ultra-clean manufacturing environments {TD_INSTRUCTIONS['HEAVY_DIFF']}",
         "display": "Polishing wafers to mirror-perfect surfaces",
         "show_temp": False
     },
     {
-        "generate": f"NVIDIA engineers in Santa Clara designing GPU architecture layouts on computer screens, creating the blueprint for RTX 4090 chips {TD_INSTRUCTIONS['CREATIVE']}",
+        "generate": f"NVIDIA engineers designing GPU architecture layouts on computer screens, creating the blueprint for RTX 4090 chips {TD_INSTRUCTIONS['CREATIVE']}",
         "display": "NVIDIA designs the GPU architecture but doesn't manufacture",
         "show_temp": False
     },
@@ -236,7 +241,7 @@ PROMPT_PAIRS = [
     },
     {
         "generate": f"ASUS, MSI, and EVGA facilities installing GPU chips onto circuit boards with power connectors and cooling systems {TD_INSTRUCTIONS['BALANCED']}",
-        "display": "Graphics card manufacturers add cooling and power systems",
+        "display": "Graphics card manufacturers",
         "show_temp": False
     },
     {
