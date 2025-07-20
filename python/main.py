@@ -20,6 +20,8 @@ def main():
     server_thread.start()
     
     prompt_interval = 0
+    current_prompt_pair = None
+    
     try:
         while True:
             # Run temperature control
@@ -35,23 +37,47 @@ def main():
             stats = get_gpu_stats()
             osc_handler.send_gpu_stats(stats)
             
-            # Send prompts every 10 seconds
+            # Send prompts every 10 seconds (or 8 seconds if generate is None)
             prompt_interval += 1
-            if prompt_interval >= 100:  # 100 * 0.1s = 10 seconds
-                prompt_pair = get_next_prompt_pair()
-                osc_handler.prompt_handler("/prompt", prompt_pair)
+            
+            # Determine interval based on current prompt pair
+            # Default to 10 seconds for normal prompts
+            interval_threshold = 100  # 100 * 0.1s = 10 seconds
+            
+            if current_prompt_pair and current_prompt_pair.get("generate") is None:
+                # Use 8 seconds for temperature monitoring mode
+                interval_threshold = 80  # 80 * 0.1s = 8 seconds
+            
+            if prompt_interval >= interval_threshold:
+                current_prompt_pair = get_next_prompt_pair()
+                osc_handler.prompt_handler("/prompt", current_prompt_pair)
                 prompt_interval = 0
                     
             time.sleep(0.1)
             
     except KeyboardInterrupt:
         print("\nShutting down...")
+        cleanup_and_exit(osc_handler)
+    except Exception as e:
+        print(f"\nUnexpected error: {e}")
+        cleanup_and_exit(osc_handler)
+
+def cleanup_and_exit(osc_handler):
+    """Clean up resources and exit gracefully"""
+    try:
         # Reset power limit to initial value
         subprocess.run(['nvidia-smi', '-pl', str(config.init_power_Consumption)])
-        # Stop OSC server
+    except Exception as e:
+        print(f"Warning: Could not reset power limit: {e}")
+    
+    # Stop OSC server
+    try:
         if hasattr(osc_handler, 'server'):
             osc_handler.server.shutdown()
-        sys.exit(0)  # Make sure to exit cleanly
+    except Exception as e:
+        print(f"Warning: Could not shutdown OSC server: {e}")
+    
+    sys.exit(0)  # Make sure to exit cleanly
 
 if __name__ == "__main__":
     main() 

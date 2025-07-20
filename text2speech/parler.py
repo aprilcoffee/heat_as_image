@@ -7,6 +7,7 @@ from pythonosc import udp_client
 from pythonosc.dispatcher import Dispatcher
 from pythonosc.osc_server import BlockingOSCUDPServer
 import threading
+import gc
 
 # Network configuration
 PARLER_IP = "127.0.0.1"
@@ -40,6 +41,8 @@ class ParlerHandler:
                 sd.stop()
             except:
                 pass
+        finally:
+            gc.collect()  # Force garbage collection
 
     def prompt_handler(self, address, *args):
         """Handle incoming OSC messages for text-to-speech"""

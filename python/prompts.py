@@ -127,6 +127,16 @@ PROMPT_PAIRS = [
         "show_temp": False
     },
     {
+        "generate": f"A Graphic Processing Unit {TD_INSTRUCTIONS['ORIGINAL']}", # Fixed typo in "Graphical"
+        "display": "This is a GPU",
+        "show_temp": False
+    },
+    {
+        "generate": f"A Graphic Processing Unit {TD_INSTRUCTIONS['BALANCED']}",
+        "display": "This is also a GPU",
+        "show_temp": False
+    },
+    {
         "generate": f"Water trucks delivering supplies to TSMC during Taiwan's 2021 drought while surrounding farmland appears dry {TD_INSTRUCTIONS['ORIGINAL']}",
         "display": "Resource allocation: H2O priority override",
         "show_temp": False
