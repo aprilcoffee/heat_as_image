@@ -1,23 +1,49 @@
 import time
 import threading
 import subprocess
+import os
 from network_utils import get_network_info
 from gpu_utils import get_gpu_stats, run_temperature_control, update_target_temperature
 from osc_handler import OSCHandler
 import config
 from prompts import get_next_prompt_pair
 import sys
+from pythonosc import udp_client
+import psutil
+
+def cleanup_existing_processes():
+    """Kill any existing Python processes that might be using our ports"""
+    try:
+        current_pid = os.getpid()
+        for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
+            try:
+                if (proc.info['name'] == 'python.exe' and 
+                    proc.info['pid'] != current_pid and 
+                    proc.info['cmdline']):
+                    cmdline = ' '.join(proc.info['cmdline'])
+                    if any(keyword in cmdline for keyword in ['main.py', 'parler.py', 'osc_handler']):
+                        print(f"Terminating existing process (PID: {proc.info['pid']}): {cmdline}")
+                        proc.terminate()
+                        proc.wait(timeout=3)
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.TimeoutExpired):
+                pass
+    except Exception as e:
+        print(f"Warning: Could not cleanup existing processes: {e}")
 
 def main():
+    # Clean up any existing processes first
+    cleanup_existing_processes()
+    
     get_network_info()
     
     # Initialize OSC handler
     osc_handler = OSCHandler()
     
-    # Start OSC server in a separate thread
-    server_thread = threading.Thread(target=osc_handler.start_osc_server)
-    server_thread.daemon = True
-    server_thread.start()
+    # Start OSC server
+    osc_handler.start_osc_server()
+    
+    # Give the server a moment to start
+    time.sleep(0.5)
     
     prompt_interval = 0
     current_prompt_pair = None
@@ -50,6 +76,7 @@ def main():
             
             if prompt_interval >= interval_threshold:
                 current_prompt_pair = get_next_prompt_pair()
+                print(f"Sending prompt: {current_prompt_pair}")
                 osc_handler.prompt_handler("/prompt", current_prompt_pair)
                 prompt_interval = 0
                     
@@ -70,12 +97,41 @@ def cleanup_and_exit(osc_handler):
     except Exception as e:
         print(f"Warning: Could not reset power limit: {e}")
     
+    # Clean up OSC handler (closes all clients including Parler)
+    try:
+        osc_handler.cleanup()
+    except Exception as e:
+        print(f"Warning: Could not cleanup OSC handler: {e}")
+    
     # Stop OSC server
     try:
         if hasattr(osc_handler, 'server'):
             osc_handler.server.shutdown()
     except Exception as e:
         print(f"Warning: Could not shutdown OSC server: {e}")
+    
+    # Try to stop Parler TTS process if it's running
+    try:
+        # Send a shutdown signal to Parler via OSC
+        print("Sending shutdown signal to Parler TTS...")
+        shutdown_client = udp_client.SimpleUDPClient("127.0.0.1", 9000)
+        shutdown_client.send_message("/shutdown", "exit")
+        shutdown_client._sock.close()
+        
+        # Also try to find and kill Parler processes more reliably
+        import psutil
+        for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
+            try:
+                if proc.info['name'] == 'python.exe' and proc.info['cmdline']:
+                    cmdline = ' '.join(proc.info['cmdline'])
+                    if 'parler.py' in cmdline:
+                        print(f"Terminating Parler process (PID: {proc.info['pid']})...")
+                        proc.terminate()
+                        proc.wait(timeout=3)
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.TimeoutExpired):
+                pass
+    except Exception as e:
+        print(f"Warning: Could not stop Parler process: {e}")
     
     sys.exit(0)  # Make sure to exit cleanly
 

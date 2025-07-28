@@ -79,12 +79,23 @@ class ParlerHandler:
                     sd.stop()
                 except:
                     pass
+    
+    def shutdown_handler(self, address, *args):
+        """Handle shutdown signal"""
+        print("Received shutdown signal, exiting...")
+        try:
+            sd.stop()  # Stop any playing audio
+        except:
+            pass
+        import sys
+        sys.exit(0)
 
     def start_osc_server(self):
         """Start OSC server to listen for incoming messages"""
         try:
             dispatcher = Dispatcher()
             dispatcher.map("/prompt", self.prompt_handler)
+            dispatcher.map("/shutdown", self.shutdown_handler)
             
             server = BlockingOSCUDPServer(
                 (PARLER_IP, PARLER_PORT), 
